@@ -1,0 +1,10 @@
+{
+  "1": {
+    "action": "baby waking up",
+    "confidence": 1.0
+  },
+  "7": {
+    "action": "reading book",
+    "confidence": 1.0
+  }
+}

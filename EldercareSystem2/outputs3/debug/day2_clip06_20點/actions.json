@@ -1,0 +1,10 @@
+{
+  "1": {
+    "action": "brushing teeth",
+    "confidence": 1.0
+  },
+  "2": {
+    "action": "brushing teeth",
+    "confidence": 1.0
+  }
+}

@@ -1,0 +1,44 @@
+# AI Weights
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.bin
+*.zip
+
+shared_weights/
+models/
+weights/
+__pycache__/
+*.pyc
+.env
+venv/
+node_modules/
+.DS_Store
+# models
+*.pt
+*.onnx
+*.zip
+*.log
+# outputs
+outputs/
+frame_cache/
+
+# cache
+__pycache__/
+*.pyc
+
+*.onnx
+*.pt
+*.zip
+outputs/
+frame_cache/
+weights/
+.git/
+.env
+.env.example
+.vscode/
+.idea/
+.claude/
+.gemini/
+.agent/

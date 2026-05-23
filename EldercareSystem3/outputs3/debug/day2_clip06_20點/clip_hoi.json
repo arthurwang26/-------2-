@@ -1,0 +1,34 @@
+[
+  {
+    "video": "day2_clip06_20點",
+    "track_id": 1,
+    "person": "陳爺爺",
+    "type": "Action",
+    "action": "brushing teeth",
+    "confidence": 1.0
+  },
+  {
+    "video": "day2_clip06_20點",
+    "track_id": 2,
+    "person": "王奶奶",
+    "type": "Action",
+    "action": "brushing teeth",
+    "confidence": 1.0
+  },
+  {
+    "video": "day2_clip06_20點",
+    "track_id": 1,
+    "person": "陳爺爺",
+    "type": "Emotion",
+    "emotion": "Happiness",
+    "confidence": 0.15570597350597382
+  },
+  {
+    "video": "day2_clip06_20點",
+    "track_id": 2,
+    "person": "王奶奶",
+    "type": "Emotion",
+    "emotion": "Happiness",
+    "confidence": 0.19225341081619263
+  }
+]

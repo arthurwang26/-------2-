@@ -1,0 +1,30 @@
+
+### [day2_clip01_9點]
+  - 陳爺爺: 動作=[Talking], 情緒=[Disgust], 物品互動=[Holding(chair)、Holding(vase)、Holding(remote)]
+  - 王奶奶: 動作=[Walking], 情緒=[Fear], 物品互動=[Holding(chair)、Holding(vase)、Holding(remote)]
+  - 場景人數: 2
+
+### [day2_clip02_11點]
+  - 陳爺爺: 動作=[Walking], 情緒=[Happiness], 物品互動=[Looking_At(dining table)、Looking_At(chair)、Looking_At(couch)]
+  - 王奶奶: 動作=[Walking], 情緒=[Happiness], 物品互動=[Using(dining table)、Using(cup)、Using(couch)]
+  - 場景人數: 2
+
+### [day2_clip03_13點]
+  - 陳爺爺: 動作=[Walking], 情緒=[Disgust], 物品互動=[Holding(dining table)、Holding(chair)、Holding(cup)]
+  - 王奶奶: 動作=[Talking], 情緒=[Happiness], 物品互動=[Holding(dining table)、Holding(chair)、Holding(cup)]
+  - 場景人數: 2
+
+### [day2_clip04_15點]
+  - 王奶奶: 動作=[Walking], 情緒=[Contempt], 物品互動=[Touching(dining table)、Touching(couch)、Touching(chair)]
+  - 陳爺爺: 動作=[Walking], 情緒=[Disgust], 物品互動=[Touching(dining table)、Touching(couch)、Touching(chair)]
+  - 場景人數: 2
+
+### [day2_clip05_17點]
+  - 王奶奶: 動作=[Sitting], 情緒=[Contempt], 物品互動=[無]
+  - 陳爺爺: 動作=[Walking], 情緒=[Happiness], 物品互動=[無]
+  - 場景人數: 2
+
+### [day2_clip06_20點]
+  - 陳爺爺: 動作=[Arguing], 情緒=[Disgust], 物品互動=[無]
+  - 王奶奶: 動作=[Arguing], 情緒=[Happiness], 物品互動=[無]
+  - 場景人數: 2

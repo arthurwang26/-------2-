@@ -1,0 +1,9 @@
+{
+  "risk_score": 0.5134809613227844,
+  "behavior_trend": "Improving",
+  "attention_weights": {
+    "day1_clip01_9點": 0.3350716829299927,
+    "day1_clip02_11點": 0.3326677083969116,
+    "day1_clip05_17點": 0.3322606384754181
+  }
+}

@@ -1,0 +1,28 @@
+
+### [day1_clip01_9點]
+  - 王奶奶: 動作=[Walking], 情緒=[Sadness], 物品互動=[Looking_At(dining table)、Looking_At(couch)、Looking_At(cup)]
+  - 場景人數: 1
+
+### [day1_clip02_11點]
+  - 陳爺爺: 動作=[Walking], 情緒=[Sadness], 物品互動=[Holding(chair)、Holding(dining table)]
+  - 王奶奶: 動作=[Talking], 情緒=[Neutral], 物品互動=[Holding(chair)、Holding(dining table)]
+  - 場景人數: 2
+
+### [day1_clip03_13點]
+  - 王奶奶: 動作=[Standing], 情緒=[Sadness], 物品互動=[Using(cup)、Using(dining table)、Using(chair)]
+  - 陳爺爺: 動作=[Walking], 情緒=[Happiness], 物品互動=[Using(cup)、Using(dining table)、Using(chair)]
+  - 場景人數: 2
+
+### [day1_clip04_15點]
+  - 陳爺爺: 動作=[Walking], 情緒=[平靜], 物品互動=[Looking_At(dining table)、Looking_At(couch)、Looking_At(chair)]
+  - 場景人數: 1
+
+### [day1_clip05_17點]
+  - 陳爺爺: 動作=[Talking], 情緒=[Happiness], 物品互動=[Sitting_On(dining table)、Sitting_On(cup)、Sitting_On(vase)]
+  - 王奶奶: 動作=[Walking], 情緒=[Disgust], 物品互動=[Using(cup)、Using(dining table)、Using(chair)]
+  - 場景人數: 2
+
+### [day1_clip06_20點]
+  - 陳爺爺: 動作=[Walking], 情緒=[Disgust], 物品互動=[Using(couch)、Using(cup)、Using(dining table)]
+  - 王奶奶: 動作=[Walking], 情緒=[Happiness], 物品互動=[Using(couch)、Using(cup)、Using(dining table)]
+  - 場景人數: 2

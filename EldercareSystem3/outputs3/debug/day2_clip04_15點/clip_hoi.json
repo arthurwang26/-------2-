@@ -1,0 +1,28 @@
+[
+  {
+    "video": "day2_clip04_15點",
+    "track_id": 1,
+    "person": "王奶奶",
+    "type": "Action",
+    "action": "use a fan",
+    "confidence": 1.0
+  },
+  {
+    "type": "HOI-CLIP",
+    "action": "Sitting_On",
+    "object": "Couch",
+    "track_id": 1,
+    "frame_idx": 0,
+    "confidence": 0.615,
+    "video": "day2_clip04_15點",
+    "person": "王奶奶"
+  },
+  {
+    "video": "day2_clip04_15點",
+    "track_id": 1,
+    "person": "王奶奶",
+    "type": "Emotion",
+    "emotion": "Disgust",
+    "confidence": 0.16325247287750244
+  }
+]
