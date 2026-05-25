@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import os
 from pathlib import Path
 
 @dataclass
@@ -22,7 +23,7 @@ class ProjectConfig:
     qwen_gguf_path: str = r"C:\Users\arthu\Desktop\新增資料夾 (2)\Qwen3-4B-Instruct-2507-Q5_K_M.gguf"
 
     # Gemini API Key
-    gemini_api_key: str = "AIzaSyBSt8FC-KwlKYj-x-7uggy_GM39LDZDNJ4"
+    gemini_api_key: str = os.environ.get("GEMINI_API_KEY", "YOUR_GEMINI_API_KEY")
 
     # YOLO relevant object classes to keep for HOI
     relevant_objects: tuple = ("cup", "chair", "couch", "tv", "book", "cell phone",
