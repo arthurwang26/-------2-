@@ -5,10 +5,10 @@ from pathlib import Path
 class ProjectConfig:
     project_root: Path = Path(__file__).parent
     data_root: Path = project_root / "data"
-    raw_dir: Path = data_root / "raw"
+    raw_dir: Path = Path("C:/Users/arthu/Desktop/新增資料夾 (2)/shared_data")
     enrollment_dir: Path = data_root / "enrollment"
     weights_dir: Path = project_root / "weights"
-    output_dir: Path = project_root / "outputs3"
+    output_dir: Path = project_root / "output2"
 
     # Model paths
     yolo_model: str = "yolov8s-worldv2.pt"

@@ -54,6 +54,15 @@ class RTMPoseEstimator:
 
         results = self.model(frames, verbose=False)
 
+        # Initialize all tracked persons with a list of None matching frame length
+        all_tids = set()
+        for frame_tracks in tracks_batch:
+            for t in frame_tracks:
+                all_tids.add(t["track_id"])
+        
+        for tid in all_tids:
+            skeleton_seqs[tid] = [None] * len(frames)
+
         for i, (res, tracks) in enumerate(zip(results, tracks_batch)):
             if res.keypoints is None or res.keypoints.data is None or not tracks:
                 continue
@@ -76,12 +85,11 @@ class RTMPoseEstimator:
                         best_tid = t["track_id"]
 
                 if best_tid != -1:
-                    if best_tid not in skeleton_seqs:
-                        skeleton_seqs[best_tid] = []
-                    skeleton_seqs[best_tid].append(kps)
+                    skeleton_seqs[best_tid][i] = kps
 
         for tid, seq in skeleton_seqs.items():
-            logger.debug(f"Track {tid}: extracted {len(seq)} skeleton frames.")
+            valid_frames = sum(1 for x in seq if x is not None)
+            logger.debug(f"Track {tid}: extracted {valid_frames} skeleton frames.")
 
         return skeleton_seqs
 

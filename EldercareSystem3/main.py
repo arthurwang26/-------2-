@@ -9,6 +9,7 @@ import sys
 import glob
 import cv2
 import json
+
 import numpy as np
 from pathlib import Path
 from typing import List, Dict, Any
@@ -29,9 +30,12 @@ logger = get_logger("main")
 EMOTION_LABELS = ['Anger', 'Contempt', 'Disgust', 'Fear', 'Happiness', 'Neutral', 'Sadness', 'Surprise']
 
 
-def extract_frames(video_path: str) -> List[np.ndarray]:
-    """Extract frames from video. Captures full clip."""
+def extract_frames(video_path: str) -> tuple:
+    """Extract frames from video and return original fps."""
     cap = cv2.VideoCapture(video_path)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    if not fps or fps <= 0:
+        fps = 8
     frames = []
     while cap.isOpened():
         ret, frame = cap.read()
@@ -39,7 +43,7 @@ def extract_frames(video_path: str) -> List[np.ndarray]:
             break
         frames.append(frame)
     cap.release()
-    return frames
+    return frames, int(fps)
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -69,16 +73,15 @@ def save_video(frames: List[np.ndarray], path: str, fps: int = 8):
 
 def merge_tracks_by_identity(identities: Dict[int, str],
                               skeletons: Dict[int, List[np.ndarray]],
-                              emotion_vectors: Dict[int, List[np.ndarray]],
                               tracks: List[List[Dict]]) -> tuple:
     """
     CRITICAL FIX: Merge fragmented track_ids belonging to the same person.
     
     ByteTrack assigns 10+ track_ids to the same person due to occlusions/turns.
-    This function merges all data (skeletons, emotions, track detections) into
+    This function merges all data (skeletons, track detections) into
     a single canonical track_id per person.
     
-    Returns: (merged_identities, merged_skeletons, merged_emotions, merged_tracks, canonical_map)
+    Returns: (merged_identities, merged_skeletons, merged_tracks, canonical_map)
     """
     # Group track_ids by person name
     name_to_tids = defaultdict(list)
@@ -107,21 +110,15 @@ def merge_tracks_by_identity(identities: Dict[int, str],
     merged_skeletons = {}
     for name, tids in name_to_tids.items():
         canonical_tid = canonical_map[tids[0]]
-        merged_seq = []
+        max_len = max([len(skeletons.get(t, [])) for t in tids] + [0])
+        merged_seq = [None] * max_len
         for tid in tids:
-            merged_seq.extend(skeletons.get(tid, []))
-        if merged_seq:
+            seq = skeletons.get(tid, [])
+            for i, kps in enumerate(seq):
+                if kps is not None and merged_seq[i] is None:
+                    merged_seq[i] = kps
+        if any(x is not None for x in merged_seq):
             merged_skeletons[canonical_tid] = merged_seq
-    
-    # Merge emotion vectors
-    merged_emotions = {}
-    for name, tids in name_to_tids.items():
-        canonical_tid = canonical_map[tids[0]]
-        merged_seq = []
-        for tid in tids:
-            merged_seq.extend(emotion_vectors.get(tid, []))
-        if merged_seq:
-            merged_emotions[canonical_tid] = merged_seq
     
     # Build merged identities
     merged_identities = {}
@@ -157,7 +154,7 @@ def merge_tracks_by_identity(identities: Dict[int, str],
     
     logger.info(f"Track merge complete: {sum(len(v) for v in name_to_tids.values())} track_ids -> {len(canonical_tids)} persons")
     
-    return merged_identities, merged_skeletons, merged_emotions, merged_tracks, canonical_map
+    return merged_identities, merged_skeletons, merged_tracks, canonical_map
 
 
 def process_pipeline():
@@ -182,16 +179,15 @@ def process_pipeline():
     from inference.tracker import ByteTrackTracker
     from inference.face import FaceIdentityMatcher
     from inference.pose import RTMPoseEstimator
-    from inference.emotion import EmotionRecognizer
     from inference.appearance_reid import AppearanceReID
-    from events.rgb_action_model import RGBActionModel
+    # Removed RGBActionModel
     from events.clip_hoi import CLIPHOIPredictor
-    from events.emotion_model import EmotionSequencePredictor
-    from events.anomaly_model import AnomalyDetector
-    from temporal.cross_day_gru import TemporalReasoningModel
     from database.kg_exporter import KnowledgeGraphExporter
     from database.ts_db import TimeSeriesDB
+    from report.blip_caption import BLIPCaptioner
     from report.vlm_caption import SmolVLMCaptioner
+    from report.gemini_video import GeminiVideoCaptioner
+
     from report.llm_report import QwenReporter
     from utils.visualizer import draw_frame
 
@@ -199,9 +195,8 @@ def process_pipeline():
     ts_db = TimeSeriesDB()
 
     # Find videos
-    import random
     all_video_files = sorted(glob.glob(str(cfg.raw_dir / "*.mp4")))
-    video_files = random.sample(all_video_files, min(3, len(all_video_files)))
+    video_files = all_video_files
     if not video_files:
         logger.error(f"No videos found in {cfg.raw_dir}")
         return
@@ -209,13 +204,12 @@ def process_pipeline():
 
     # Global state
     events_by_clip = {}
-    anomaly_by_clip = {}
     captions_by_clip = {}
+    vlm_captions_dict = {}
+    gemini_captions_dict = {}
+
     skeletons_by_clip = {}
     all_baseline_skeletons = {}
-
-    # Keep face app reference for emotion module
-    face_app_ref = None
 
     # Global Appearance ReID to handle back-to-camera tracking
     reid_app = AppearanceReID()
@@ -226,7 +220,7 @@ def process_pipeline():
         logger.info(f"Processing [{vid_idx+1}/{len(video_files)}]: {vid_name}")
         logger.info(f"{'='*50}")
 
-        frames = extract_frames(video_path)
+        frames, fps = extract_frames(video_path)
         if not frames:
             logger.warning(f"No frames from {video_path}")
             continue
@@ -256,28 +250,43 @@ def process_pipeline():
                 all_obj_classes.add(o["class_name"])
         logger.info(f"Detected objects: {all_obj_classes}")
 
-        # 2. Face Identity Matching (v2.1: no greedy constraint)
+        # 2. Face Identity Matching
         with ModelGuard("Face Matcher"):
             face = FaceIdentityMatcher()
             face.load()
             identities = face.match_identities(frames, tracks)
-            face_app_ref = face.app  # Keep for emotion
         
         # Cross-clip Appearance ReID (fixes back-to-camera without assumptions)
+        # 1. Update gallery ONLY using confidently Face-Matched tracks to prevent poisoning
+        for tid, name in identities.items():
+            if name != "Unknown":
+                for f_idx in range(0, len(frames), 5):
+                    frame_tracks = tracks[f_idx] if f_idx < len(tracks) else []
+                    t_obj = next((t for t in frame_tracks if t["track_id"] == tid), None)
+                    if t_obj:
+                        hist = reid_app.extract_histogram(frames[f_idx], t_obj["bbox"])
+                        reid_app.update_gallery(name, hist)
+
+        # 2. Identify unknown tracks using the clean gallery via majority voting
         for tid in all_tids:
-            for f_idx, frame_tracks in enumerate(tracks):
-                t_obj = next((t for t in frame_tracks if t["track_id"] == tid), None)
-                if t_obj:
-                    hist = reid_app.extract_histogram(frames[f_idx], t_obj["bbox"])
-                    if np.sum(hist) > 0:
-                        if identities.get(tid, "Unknown") != "Unknown":
-                            reid_app.update_gallery(identities[tid], hist)
-                        else:
-                            matched_name = reid_app.identify(hist)
-                            if matched_name != "Unknown":
-                                identities[tid] = matched_name
-                                logger.info(f"ReID Match: Track {tid} -> {matched_name} based on clothing appearance")
-                    break
+            if identities.get(tid, "Unknown") == "Unknown":
+                reid_votes = []
+                for f_idx in range(0, len(frames), 5):
+                    frame_tracks = tracks[f_idx] if f_idx < len(tracks) else []
+                    t_obj = next((t for t in frame_tracks if t["track_id"] == tid), None)
+                    if t_obj:
+                        hist = reid_app.extract_histogram(frames[f_idx], t_obj["bbox"])
+                        matched_name = reid_app.identify(hist)
+                        if matched_name != "Unknown":
+                            reid_votes.append(matched_name)
+                
+                if reid_votes:
+                    from collections import Counter
+                    most_common = Counter(reid_votes).most_common(1)[0]
+                    # Only assign if the majority vote is strong enough (e.g., at least 2 votes or 100% of 1)
+                    if most_common[1] >= len(reid_votes) * 0.5:
+                        identities[tid] = most_common[0]
+                        logger.info(f"ReID Match: Track {tid} -> {most_common[0]} based on majority clothing votes")
 
         logger.info(f"Identities before merge: {identities}")
 
@@ -288,18 +297,11 @@ def process_pipeline():
             skeletons = pose.estimate(frames, tracks)
         logger.info(f"Skeletons extracted for tracks: {list(skeletons.keys())}")
 
-        # 4. Emotion Recognition
-        with ModelGuard("Emotion"):
-            emo = EmotionRecognizer()
-            emo.load()
-            emotion_vectors = emo.recognize(frames, tracks, face_app=face_app_ref)
-        face_app_ref = None  # Release
-
         # ===== v2.1 CRITICAL FIX: TRACK MERGING =====
         # Merge fragmented track_ids for the same person
-        (merged_identities, merged_skeletons, merged_emotions, 
+        (merged_identities, merged_skeletons, 
          merged_tracks, canonical_map) = merge_tracks_by_identity(
-            identities, skeletons, emotion_vectors, tracks)
+            identities, skeletons, tracks)
         
         # Use merged data from here on
         identities = merged_identities
@@ -318,38 +320,30 @@ def process_pipeline():
 
         # ===== EVENT GENERATION LAYER =====
 
-        # 5. Action Recognition (VideoMAE RGB)
-        with ModelGuard("VideoMAE"):
-            act_model = RGBActionModel()
-            act_model.load()
+        # 5. Action Recognition (Custom Transformer+LSTM with Skeletons)
+        with ModelGuard("TransformerLSTM"):
+            from events.skeleton_action_model import CustomSkeletonActionModel
+            act_model = CustomSkeletonActionModel()
             
             actions = {}
+            frame_h, frame_w = frames[0].shape[:2]
             for tid in identities.keys():
-                crops = []
-                for f_idx, frame in enumerate(frames):
-                    frame_tracks_i = tracks[f_idx] if f_idx < len(tracks) else []
-                    t_obj = next((t for t in frame_tracks_i if t["track_id"] == tid), None)
-                    if t_obj:
-                        x1, y1, x2, y2 = t_obj["bbox"]
-                        h, w = frame.shape[:2]
-                        x1, y1 = max(0, int(x1)), max(0, int(y1))
-                        x2, y2 = min(w, int(x2)), min(h, int(y2))
-                        if x2 > x1 and y2 > y1:
-                            crops.append(frame[y1:y2, x1:x2])
-                
-                if len(crops) > 0:
-                    act_label = act_model.predict(crops)
-                    actions[tid] = {"action": act_label, "confidence": 1.0}
+                skel_seq = skeletons.get(tid, [])
+                act_list = act_model.predict(skel_seq, w=frame_w, h=frame_h)
+                actions[tid] = act_list
 
-        for tid, act in actions.items():
+        for tid, act_list in actions.items():
             name = identities.get(tid, f"ID:{tid}")
             if name == "Unknown":
                 continue
-            clip_events.append({
-                "video": vid_name, "track_id": tid, "person": name,
-                "type": "Action", "action": act["action"],
-                "confidence": act["confidence"]
-            })
+            for act in act_list:
+                clip_events.append({
+                    "video": vid_name, "track_id": tid, "person": name,
+                    "type": "Action", "action": act["action"],
+                    "confidence": act["confidence"],
+                    "start_frame": act["start_frame"],
+                    "end_frame": act["end_frame"]
+                })
 
         # 6. HOI Prediction (Continuous CLIP Zero-Shot)
         with ModelGuard("HOI CLIP"):
@@ -366,40 +360,56 @@ def process_pipeline():
             h["person"] = name
             clip_events.append(h)
 
-        # 7. Emotion Sequence Prediction (GRU)
-        with ModelGuard("Emotion GRU"):
-            emo_model = EmotionSequencePredictor()
-            emo_model.load()
-            emotions = emo_model.predict(merged_emotions)
-
-        for tid, emo_result in emotions.items():
-            name = identities.get(tid, f"ID:{tid}")
-            if name == "Unknown":
-                continue
-            clip_events.append({
-                "video": vid_name, "track_id": tid, "person": name,
-                "type": "Emotion", "emotion": emo_result["emotion"],
-                "confidence": emo_result["confidence"]
-            })
-
+        # ===== BLIP CAPTION & GROUNDING =====
+        with ModelGuard("BLIP"):
+            blip = BLIPCaptioner()
+            blip.load()
+            
+            # 1. Grounding (Cross-Validation of CLIP HOI)
+            hoi_candidates = [h for h in clip_events if h.get("type") in ("HOI", "HOI-CLIP")]
+            verified_hoi = []
+            for h in hoi_candidates:
+                f_idx = h.get("frame_idx", len(frames)//2)
+                f_idx = min(f_idx, len(frames)-1)
+                frame = frames[f_idx]
+                action_str = h.get("action", "")
+                result = blip.verify_action(frame, action_str)
+                h["blip_verified"] = result["verified"]
+                h["blip_confidence"] = result["confidence"]
+                verified_hoi.append(h)
+                logger.info(f"BLIP verified {action_str}: {result['verified']} (conf: {result['confidence']})")
+            
+            non_hoi_events = [h for h in clip_events if h.get("type") not in ("HOI", "HOI-CLIP")]
+            clip_events = non_hoi_events + verified_hoi
+            
+            # 2. Keyframe Captioning
+            captions = []
+            for i in range(0, len(frames), 30):
+                cap_text = blip.generate_caption(frames[i], "This is a photo of ")
+                captions.append({
+                    "frame_idx": i,
+                    "caption": cap_text
+                })
+                
+            for c in captions:
+                c["video"] = vid_name
+            captions_by_clip[vid_name] = captions
         # ===== VLM CAPTION & GROUNDING =====
         with ModelGuard("VLM"):
             vlm = SmolVLMCaptioner()
             vlm.load()
-            
-            # 1. Grounding (Cross-Validation of CLIP HOI)
-            hoi_candidates = [h for h in clip_events if h.get("type") == "HOI"]
-            verified_hoi = vlm.verify_hoi_events(frames, hoi_candidates)
-            
-            # Replace HOI events in clip_events with only verified ones
-            non_hoi_events = [h for h in clip_events if h.get("type") != "HOI"]
-            clip_events = non_hoi_events + verified_hoi
-            
-            # 2. Keyframe Captioning
-            captions = vlm.caption_keyframes(frames, objects, identities, interval=30)
-            for c in captions:
-                c["video"] = vid_name
-            captions_by_clip[vid_name] = captions
+            vlm_captions = vlm.caption_keyframes(frames, objects, identities, interval=30)
+            vlm_captions_dict[vid_name] = vlm_captions
+        # ===== GEMINI CLOUD API =====
+        logger.info(f"Calling Gemini API for {vid_name}...")
+        gemini = GeminiVideoCaptioner(cfg.gemini_api_key)
+        gemini.load()
+        gemini_res = gemini.generate_video_caption(video_path)
+        gemini_captions_dict[vid_name] = gemini_res
+        logger.info(f"Gemini output: {gemini_res}")
+
+
+
 
         events_by_clip[vid_name] = clip_events
         # Save to Time-Series DB
@@ -409,12 +419,19 @@ def process_pipeline():
         vis_frames = []
         for i, frame in enumerate(frames):
             frame_tracks_i = tracks[i] if i < len(tracks) else []
+            # Restore skeleton drawing
             frame_skels = {}
-            for tid, sk_seq in skeletons.items():
-                if i < len(sk_seq):
-                    frame_skels[tid] = sk_seq[i]
-            frame_actions = {tid: act["action"] for tid, act in actions.items()}
-            frame_emotions = {tid: emo["emotion"] for tid, emo in emotions.items()}
+            for tid, skels in skeletons.items():
+                if i < len(skels) and skels[i] is not None:
+                    frame_skels[tid] = skels[i]
+            frame_actions = {}
+            for tid, act_list in actions.items():
+                for act in act_list:
+                    if act["start_frame"] <= i < act["end_frame"]:
+                        frame_actions[tid] = act["action"]
+                        break
+            
+            frame_emotions = {}
             frame_objs = objects[i] if i < len(objects) else []
 
             v = draw_frame(
@@ -429,51 +446,36 @@ def process_pipeline():
             vis_frames.append(v)
 
         vis_path = str(cfg.output_dir / "visuals" / f"{vid_name}_vis.mp4")
-        save_video(vis_frames, vis_path)
+        save_video(vis_frames, vis_path, fps=fps)
         logger.info(f"Visualization saved: {vis_path}")
 
         # Log clip summary
         logger.info(f"--- {vid_name} Summary ---")
         for ev in clip_events:
-            logger.info(f"  {ev['person']}: {ev['type']}={ev.get('action', ev.get('emotion', ''))}")
+            logger.info(f"  {ev['person']}: {ev['type']}={ev.get('action', '')}")
             
         # V5.1 Module-level comprehensive debug outputs
         save_debug_json(vid_name, "tracks.json", tracks)
         save_debug_json(vid_name, "objects.json", objects)
         save_debug_json(vid_name, "skeletons.json", skeletons)
         save_debug_json(vid_name, "actions.json", actions)
-        save_debug_json(vid_name, "emotions.json", emotions)
         save_debug_json(vid_name, "clip_hoi.json", clip_events)
-
-    # ===== ANOMALY DETECTION (Self-supervised) =====
-    logger.info("\n--- Phase: Self-Supervised Anomaly Detection ---")
-
-    with ModelGuard("Anomaly AE"):
-        ae = AnomalyDetector()
-        ae.load()
-
-        if all_baseline_skeletons:
-            ae.train_baseline(all_baseline_skeletons, epochs=30)
-
-        for vid_name in sorted(skeletons_by_clip.keys()):
-            skel = skeletons_by_clip[vid_name]
-            scores = ae.predict(skel)
-            avg_score = np.mean(list(scores.values())) if scores else 0.0
-            anomaly_by_clip[vid_name] = float(avg_score)
-            ts_db.insert_anomaly(vid_name, avg_score)
-            logger.info(f"{vid_name}: anomaly_score={avg_score:.4f}")
-
-    # ===== CROSS-DAY TEMPORAL REASONING =====
-    logger.info("\n--- Phase: Cross-Day Temporal Reasoning ---")
-    with ModelGuard("BiGRU"):
-        temporal = TemporalReasoningModel()
-        temporal.load()
-        reasoning = temporal.reason(events_by_clip, anomaly_by_clip)
-
-    risk_score = reasoning["risk_score"]
-    trend = reasoning["behavior_trend"]
-    ts_db.insert_temporal_risk(risk_score, trend)
-    logger.info(f"Risk Score: {risk_score:.4f}, Trend: {trend}")
+    # ===== KNOWLEDGE GRAPH GENERATION =====
+    logger.info("\n--- Phase: Knowledge Graph Generation ---")
+    kg_text = ""
+    sys_dir = cfg.output_dir / "system_docs"
+    sys_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        from report.kg_generator import generate_mermaid_graph, generate_neo4j_cypher
+        kg_md_path = sys_dir / "knowledge_graph.md"
+        kg_text = generate_mermaid_graph(events_by_clip, kg_md_path)
+        logger.info(f"Knowledge Graph (Markdown) saved to {kg_md_path}")
+        
+        kg_cypher_path = sys_dir / "knowledge_graph.cypher"
+        generate_neo4j_cypher(events_by_clip, kg_cypher_path)
+        logger.info(f"Knowledge Graph (Neo4j Cypher) saved to {kg_cypher_path}")
+    except Exception as e:
+        logger.error(f"Failed to generate KG: {e}")
 
     # ===== LLM REPORT GENERATION =====
     logger.info("\n--- Phase: LLM Report Generation ---")
@@ -482,11 +484,12 @@ def process_pipeline():
         reporter.load()
         report = reporter.generate_report(
             events_by_clip=events_by_clip,
-            anomaly_by_clip=anomaly_by_clip,
-            risk_score=risk_score,
-            trend=trend,
-            captions_by_clip=captions_by_clip
+            captions_by_clip=captions_by_clip,
+            vlm_captions_by_clip=vlm_captions_dict,
+            gemini_by_clip=gemini_captions_dict,
+            kg_text=kg_text
         )
+
 
     # Save outputs
     sys_dir = cfg.output_dir / "system_docs"
@@ -501,29 +504,6 @@ def process_pipeline():
     debug_dir.mkdir(parents=True, exist_ok=True)
     with open(debug_dir / "events.json", "w", encoding="utf-8") as f:
         json.dump(events_by_clip, f, ensure_ascii=False, indent=2)
-
-    with open(cfg.output_dir / "debug" / "anomalies.json", "w", encoding="utf-8") as f:
-        json.dump(anomaly_by_clip, f, ensure_ascii=False, indent=2)
-
-    with open(cfg.output_dir / "debug" / "reasoning.json", "w", encoding="utf-8") as f:
-        json.dump(reasoning, f, ensure_ascii=False, indent=2)
-
-    # Generate Knowledge Graph (V5.1 Update)
-    kg_exporter = KnowledgeGraphExporter()
-    kg_exporter.process_events(events_by_clip)
-    kg_exporter.export()
-
-    try:
-        from report.kg_generator import generate_mermaid_graph, generate_neo4j_cypher
-        kg_md_path = sys_dir / "knowledge_graph.md"
-        generate_mermaid_graph(events_by_clip, kg_md_path)
-        logger.info(f"Knowledge Graph (Markdown) saved to {kg_md_path}")
-        
-        kg_cypher_path = sys_dir / "knowledge_graph.cypher"
-        generate_neo4j_cypher(events_by_clip, kg_cypher_path)
-        logger.info(f"Knowledge Graph (Neo4j Cypher) saved to {kg_cypher_path}")
-    except Exception as e:
-        logger.error(f"Failed to generate legacy KG views: {e}")
 
     logger.info(f"\n{'='*60}")
     logger.info("Pipeline Complete!")

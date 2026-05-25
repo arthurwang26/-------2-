@@ -1,0 +1,1282 @@
+{
+  "day1_clip01_9點": [
+    {
+      "video": "day1_clip01_9點",
+      "track_id": 4,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.9785356521606445,
+      "type": "HOI",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "cup",
+      "confidence": 0.9513974189758301,
+      "type": "HOI",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "dining table",
+      "confidence": 0.9563680291175842,
+      "type": "HOI",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.9556321501731873,
+      "type": "HOI",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.9812643527984619,
+      "type": "HOI-CLIP",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.9805907607078552,
+      "type": "HOI-CLIP",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "cup",
+      "confidence": 0.9753698706626892,
+      "type": "HOI-CLIP",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "dining table",
+      "confidence": 0.9301979541778564,
+      "type": "HOI-CLIP",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.8686675429344177,
+      "type": "HOI-CLIP",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.9736945033073425,
+      "type": "HOI-CLIP",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.8378503322601318,
+      "type": "HOI-CLIP",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.9012339115142822,
+      "type": "HOI-CLIP",
+      "video": "day1_clip01_9點",
+      "person": "王奶奶"
+    }
+  ],
+  "day1_clip02_11點": [
+    {
+      "video": "day1_clip02_11點",
+      "track_id": 7,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "video": "day1_clip02_11點",
+      "track_id": 1,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.6883447170257568,
+      "type": "HOI",
+      "video": "day1_clip02_11點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 7,
+      "action": "Touching",
+      "object": "chair",
+      "confidence": 0.3547345995903015,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 7,
+      "action": "Sitting_On",
+      "object": "dining table",
+      "confidence": 0.3030780553817749,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 7,
+      "action": "Looking_At",
+      "object": "chair",
+      "confidence": 0.2884814441204071,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 7,
+      "action": "Holding",
+      "object": "chair",
+      "confidence": 0.28403666615486145,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 7,
+      "action": "Holding",
+      "object": "chair",
+      "confidence": 0.3280664384365082,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 7,
+      "action": "Sitting_On",
+      "object": "dining table",
+      "confidence": 0.3030780553817749,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 1,
+      "action": "Walking_With",
+      "object": "chair",
+      "confidence": 0.30335134267807007,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Looking_At",
+      "object": "dining table",
+      "confidence": 0.5166456699371338,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Holding",
+      "object": "chair",
+      "confidence": 0.23385126888751984,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Looking_At",
+      "object": "chair",
+      "confidence": 0.6177356243133545,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Walking_With",
+      "object": "chair",
+      "confidence": 0.2357080727815628,
+      "type": "HOI-CLIP",
+      "video": "day1_clip02_11點",
+      "person": "王奶奶"
+    }
+  ],
+  "day1_clip03_13點": [
+    {
+      "video": "day1_clip03_13點",
+      "track_id": 1,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "video": "day1_clip03_13點",
+      "track_id": 8,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 1,
+      "action": "Using",
+      "object": "cup",
+      "confidence": 0.9998388886451721,
+      "type": "HOI",
+      "video": "day1_clip03_13點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Using",
+      "object": "dining table",
+      "confidence": 0.9998720288276672,
+      "type": "HOI",
+      "video": "day1_clip03_13點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.5000003576278687,
+      "type": "HOI",
+      "video": "day1_clip03_13點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "cup",
+      "confidence": 0.6430460810661316,
+      "type": "HOI-CLIP",
+      "video": "day1_clip03_13點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "dining table",
+      "confidence": 0.5973788499832153,
+      "type": "HOI-CLIP",
+      "video": "day1_clip03_13點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.7352092862129211,
+      "type": "HOI-CLIP",
+      "video": "day1_clip03_13點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.7352092862129211,
+      "type": "HOI-CLIP",
+      "video": "day1_clip03_13點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.7352092862129211,
+      "type": "HOI-CLIP",
+      "video": "day1_clip03_13點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 8,
+      "action": "Touching",
+      "object": "chair",
+      "confidence": 0.43690621852874756,
+      "type": "HOI-CLIP",
+      "video": "day1_clip03_13點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 8,
+      "action": "Touching",
+      "object": "chair",
+      "confidence": 0.3399946093559265,
+      "type": "HOI-CLIP",
+      "video": "day1_clip03_13點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 8,
+      "action": "Touching",
+      "object": "chair",
+      "confidence": 0.43690621852874756,
+      "type": "HOI-CLIP",
+      "video": "day1_clip03_13點",
+      "person": "陳爺爺"
+    }
+  ],
+  "day1_clip04_15點": [
+    {
+      "video": "day1_clip04_15點",
+      "track_id": 13,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 13,
+      "action": "Touching",
+      "object": "chair",
+      "confidence": 0.5778484344482422,
+      "type": "HOI",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Touching",
+      "object": "couch",
+      "confidence": 0.5759763717651367,
+      "type": "HOI",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Touching",
+      "object": "tv",
+      "confidence": 0.5780435800552368,
+      "type": "HOI",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Touching",
+      "object": "dining table",
+      "confidence": 0.5785521864891052,
+      "type": "HOI",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.7880646586418152,
+      "type": "HOI-CLIP",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Looking_At",
+      "object": "tv",
+      "confidence": 0.45983999967575073,
+      "type": "HOI-CLIP",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Looking_At",
+      "object": "chair",
+      "confidence": 0.5641502737998962,
+      "type": "HOI-CLIP",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Looking_At",
+      "object": "dining table",
+      "confidence": 0.5641502737998962,
+      "type": "HOI-CLIP",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Looking_At",
+      "object": "chair",
+      "confidence": 0.5641502737998962,
+      "type": "HOI-CLIP",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Looking_At",
+      "object": "dining table",
+      "confidence": 0.5641502737998962,
+      "type": "HOI-CLIP",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Walking_With",
+      "object": "chair",
+      "confidence": 0.35497087240219116,
+      "type": "HOI-CLIP",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 13,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.6229087710380554,
+      "type": "HOI-CLIP",
+      "video": "day1_clip04_15點",
+      "person": "陳爺爺"
+    }
+  ],
+  "day1_clip05_17點": [
+    {
+      "video": "day1_clip05_17點",
+      "track_id": 4,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "video": "day1_clip05_17點",
+      "track_id": 8,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 4,
+      "action": "Sitting_On",
+      "object": "cup",
+      "confidence": 0.2543104588985443,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 4,
+      "action": "Looking_At",
+      "object": "dining table",
+      "confidence": 0.3143607974052429,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 4,
+      "action": "Walking_With",
+      "object": "chair",
+      "confidence": 0.35214659571647644,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 4,
+      "action": "Using",
+      "object": "couch",
+      "confidence": 0.2828223407268524,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 4,
+      "action": "Walking_With",
+      "object": "couch",
+      "confidence": 0.4320374131202698,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 4,
+      "action": "Looking_At",
+      "object": "chair",
+      "confidence": 0.3384146988391876,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 4,
+      "action": "Looking_At",
+      "object": "couch",
+      "confidence": 0.3384146988391876,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 8,
+      "action": "Sitting_On",
+      "object": "cup",
+      "confidence": 0.3275247812271118,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 8,
+      "action": "Touching",
+      "object": "dining table",
+      "confidence": 0.4019756615161896,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 8,
+      "action": "Looking_At",
+      "object": "chair",
+      "confidence": 0.45729029178619385,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 8,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.3068254888057709,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 8,
+      "action": "Looking_At",
+      "object": "chair",
+      "confidence": 0.6494503021240234,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 8,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.3643335700035095,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 8,
+      "action": "Looking_At",
+      "object": "couch",
+      "confidence": 0.603216826915741,
+      "type": "HOI-CLIP",
+      "video": "day1_clip05_17點",
+      "person": "王奶奶"
+    }
+  ],
+  "day1_clip06_20點": [
+    {
+      "video": "day1_clip06_20點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "video": "day1_clip06_20點",
+      "track_id": 1,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 2,
+      "action": "Sitting_On",
+      "object": "dining table",
+      "confidence": 0.3750065267086029,
+      "type": "HOI-CLIP",
+      "video": "day1_clip06_20點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 2,
+      "action": "Sitting_On",
+      "object": "cup",
+      "confidence": 0.4075900614261627,
+      "type": "HOI-CLIP",
+      "video": "day1_clip06_20點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 2,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.2801019251346588,
+      "type": "HOI-CLIP",
+      "video": "day1_clip06_20點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 2,
+      "action": "Holding",
+      "object": "couch",
+      "confidence": 0.2651120722293854,
+      "type": "HOI-CLIP",
+      "video": "day1_clip06_20點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 1,
+      "action": "Looking_At",
+      "object": "dining table",
+      "confidence": 0.24530664086341858,
+      "type": "HOI-CLIP",
+      "video": "day1_clip06_20點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Touching",
+      "object": "cup",
+      "confidence": 0.2698366641998291,
+      "type": "HOI-CLIP",
+      "video": "day1_clip06_20點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.37808486819267273,
+      "type": "HOI-CLIP",
+      "video": "day1_clip06_20點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.47190549969673157,
+      "type": "HOI-CLIP",
+      "video": "day1_clip06_20點",
+      "person": "王奶奶"
+    }
+  ],
+  "day2_clip01_9點": [
+    {
+      "video": "day2_clip01_9點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "video": "day2_clip01_9點",
+      "track_id": 7,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 7,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.5000007152557373,
+      "type": "HOI",
+      "video": "day2_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 7,
+      "action": "Holding",
+      "object": "remote",
+      "confidence": 0.41865047812461853,
+      "type": "HOI",
+      "video": "day2_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 2,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.31149983406066895,
+      "type": "HOI-CLIP",
+      "video": "day2_clip01_9點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 2,
+      "action": "Walking_With",
+      "object": "chair",
+      "confidence": 0.7196680307388306,
+      "type": "HOI-CLIP",
+      "video": "day2_clip01_9點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 2,
+      "action": "Walking_With",
+      "object": "chair",
+      "confidence": 0.49139219522476196,
+      "type": "HOI-CLIP",
+      "video": "day2_clip01_9點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 2,
+      "action": "Looking_At",
+      "object": "vase",
+      "confidence": 0.331527441740036,
+      "type": "HOI-CLIP",
+      "video": "day2_clip01_9點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 7,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.6038020849227905,
+      "type": "HOI-CLIP",
+      "video": "day2_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 7,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.9083364605903625,
+      "type": "HOI-CLIP",
+      "video": "day2_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 7,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.46691182255744934,
+      "type": "HOI-CLIP",
+      "video": "day2_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 7,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.3849627375602722,
+      "type": "HOI-CLIP",
+      "video": "day2_clip01_9點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 7,
+      "action": "Looking_At",
+      "object": "vase",
+      "confidence": 0.4900171756744385,
+      "type": "HOI-CLIP",
+      "video": "day2_clip01_9點",
+      "person": "王奶奶"
+    }
+  ],
+  "day2_clip02_11點": [
+    {
+      "video": "day2_clip02_11點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "video": "day2_clip02_11點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.4217153489589691,
+      "type": "HOI-CLIP",
+      "video": "day2_clip02_11點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "dining table",
+      "confidence": 0.47052451968193054,
+      "type": "HOI-CLIP",
+      "video": "day2_clip02_11點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 1,
+      "action": "Touching",
+      "object": "cup",
+      "confidence": 0.35173434019088745,
+      "type": "HOI-CLIP",
+      "video": "day2_clip02_11點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "cup",
+      "confidence": 0.5318781733512878,
+      "type": "HOI-CLIP",
+      "video": "day2_clip02_11點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 2,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.43508222699165344,
+      "type": "HOI-CLIP",
+      "video": "day2_clip02_11點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 2,
+      "action": "Sitting_On",
+      "object": "cup",
+      "confidence": 0.4717901349067688,
+      "type": "HOI-CLIP",
+      "video": "day2_clip02_11點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 2,
+      "action": "Sitting_On",
+      "object": "cup",
+      "confidence": 0.6165643930435181,
+      "type": "HOI-CLIP",
+      "video": "day2_clip02_11點",
+      "person": "王奶奶"
+    }
+  ],
+  "day2_clip03_13點": [
+    {
+      "video": "day2_clip03_13點",
+      "track_id": 10,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "video": "day2_clip03_13點",
+      "track_id": 1,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 10,
+      "action": "Holding",
+      "object": "cup",
+      "confidence": 0.23850491642951965,
+      "type": "HOI-CLIP",
+      "video": "day2_clip03_13點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 10,
+      "action": "Touching",
+      "object": "dining table",
+      "confidence": 0.2022312730550766,
+      "type": "HOI-CLIP",
+      "video": "day2_clip03_13點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 10,
+      "action": "Holding",
+      "object": "chair",
+      "confidence": 0.264335572719574,
+      "type": "HOI-CLIP",
+      "video": "day2_clip03_13點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 1,
+      "action": "Touching",
+      "object": "cup",
+      "confidence": 0.38348889350891113,
+      "type": "HOI-CLIP",
+      "video": "day2_clip03_13點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Touching",
+      "object": "dining table",
+      "confidence": 0.4119455814361572,
+      "type": "HOI-CLIP",
+      "video": "day2_clip03_13點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.6395573019981384,
+      "type": "HOI-CLIP",
+      "video": "day2_clip03_13點",
+      "person": "王奶奶"
+    }
+  ],
+  "day2_clip04_15點": [
+    {
+      "video": "day2_clip04_15點",
+      "track_id": 1,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "video": "day2_clip04_15點",
+      "track_id": 5,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.522748589515686,
+      "type": "HOI",
+      "video": "day2_clip04_15點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.9262685775756836,
+      "type": "HOI-CLIP",
+      "video": "day2_clip04_15點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.6070452928543091,
+      "type": "HOI-CLIP",
+      "video": "day2_clip04_15點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.7184087634086609,
+      "type": "HOI-CLIP",
+      "video": "day2_clip04_15點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.8606951832771301,
+      "type": "HOI-CLIP",
+      "video": "day2_clip04_15點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 5,
+      "action": "Sitting_On",
+      "object": "couch",
+      "confidence": 0.6396518349647522,
+      "type": "HOI-CLIP",
+      "video": "day2_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 5,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.659797191619873,
+      "type": "HOI-CLIP",
+      "video": "day2_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 5,
+      "action": "Sitting_On",
+      "object": "dining table",
+      "confidence": 0.36072027683258057,
+      "type": "HOI-CLIP",
+      "video": "day2_clip04_15點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 5,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.8328993916511536,
+      "type": "HOI-CLIP",
+      "video": "day2_clip04_15點",
+      "person": "陳爺爺"
+    }
+  ],
+  "day2_clip05_17點": [
+    {
+      "video": "day2_clip05_17點",
+      "track_id": 1,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "video": "day2_clip05_17點",
+      "track_id": 18,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 18,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.5028672814369202,
+      "type": "HOI",
+      "video": "day2_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.9356535077095032,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.9234388470649719,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.8793154954910278,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "cup",
+      "confidence": 0.9345332980155945,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.9591765403747559,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "dining table",
+      "confidence": 0.8793154954910278,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 1,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.9591765403747559,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "王奶奶"
+    },
+    {
+      "track_id": 18,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.4724569320678711,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 18,
+      "action": "Touching",
+      "object": "couch",
+      "confidence": 0.27764439582824707,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 18,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.329998642206192,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 18,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.4448230266571045,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 18,
+      "action": "Sitting_On",
+      "object": "chair",
+      "confidence": 0.5495185852050781,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 18,
+      "action": "Touching",
+      "object": "cup",
+      "confidence": 0.26964133977890015,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 18,
+      "action": "Touching",
+      "object": "dining table",
+      "confidence": 0.36589550971984863,
+      "type": "HOI-CLIP",
+      "video": "day2_clip05_17點",
+      "person": "陳爺爺"
+    }
+  ],
+  "day2_clip06_20點": [
+    {
+      "video": "day2_clip06_20點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "video": "day2_clip06_20點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Unknown",
+      "confidence": 0.0
+    },
+    {
+      "track_id": 1,
+      "action": "Walking_With",
+      "object": "dining table",
+      "confidence": 0.6507868766784668,
+      "type": "HOI-CLIP",
+      "video": "day2_clip06_20點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 1,
+      "action": "Walking_With",
+      "object": "couch",
+      "confidence": 0.4705885648727417,
+      "type": "HOI-CLIP",
+      "video": "day2_clip06_20點",
+      "person": "陳爺爺"
+    },
+    {
+      "track_id": 2,
+      "action": "Walking_With",
+      "object": "couch",
+      "confidence": 0.7448450326919556,
+      "type": "HOI-CLIP",
+      "video": "day2_clip06_20點",
+      "person": "王奶奶"
+    }
+  ]
+}

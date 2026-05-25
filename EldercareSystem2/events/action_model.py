@@ -40,6 +40,15 @@ NTU60_CLASSES = [
     "handshaking", "walking towards each other", "walking apart from each other"
 ]
 
+ELDERCARE_WHITELIST = {
+    "drink water", "eat meal/snack", "sitting down", "standing up", "reading",
+    "writing", "make a phone call", "staggering", "falling", 
+    "touch head (headache)", "touch chest (stomachache/heart pain)", 
+    "touch back (backache)", "touch neck (neckache)", "nausea or vomiting condition", 
+    "walking towards each other", "walking apart from each other",
+    "pointing to something", "nod head/bow", "shake head",
+    "punching/slapping other person", "kicking other person", "pushing other person"
+}
 
 class MotionBERTActionModel:
     def __init__(self):
@@ -156,7 +165,9 @@ class MotionBERTActionModel:
             pred_idx = torch.argmax(logits, dim=1).item()
             
         if 0 <= pred_idx < len(NTU60_CLASSES):
-            return NTU60_CLASSES[pred_idx]
+            pred_action = NTU60_CLASSES[pred_idx]
+            if pred_action in ELDERCARE_WHITELIST:
+                return pred_action
         return "Unknown"
 
 if __name__ == "__main__":

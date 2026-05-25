@@ -1,0 +1,66 @@
+[
+  {
+    "video": "day1_clip06_20點",
+    "track_id": 7,
+    "person": "陳爺爺",
+    "type": "Action",
+    "action": "shaking head",
+    "confidence": 1.0
+  },
+  {
+    "video": "day1_clip06_20點",
+    "track_id": 2,
+    "person": "王奶奶",
+    "type": "Action",
+    "action": "massaging back",
+    "confidence": 1.0
+  },
+  {
+    "type": "HOI-CLIP",
+    "action": "Drinking_From",
+    "object": "Cup",
+    "track_id": 2,
+    "frame_idx": 0,
+    "confidence": 0.528,
+    "video": "day1_clip06_20點",
+    "person": "王奶奶",
+    "blip_verified": false,
+    "blip_confidence": 0.2
+  },
+  {
+    "type": "HOI-CLIP",
+    "action": "Sitting_On",
+    "object": "Couch",
+    "track_id": 7,
+    "frame_idx": 0,
+    "confidence": 0.734,
+    "video": "day1_clip06_20點",
+    "person": "陳爺爺",
+    "blip_verified": false,
+    "blip_confidence": 0.2
+  },
+  {
+    "type": "HOI-CLIP",
+    "action": "Sitting_On",
+    "object": "Couch",
+    "track_id": 2,
+    "frame_idx": 90,
+    "confidence": 0.658,
+    "video": "day1_clip06_20點",
+    "person": "王奶奶",
+    "blip_verified": false,
+    "blip_confidence": 0.2
+  },
+  {
+    "type": "HOI-CLIP",
+    "action": "Watching",
+    "object": "TV",
+    "track_id": 7,
+    "frame_idx": 180,
+    "confidence": 0.519,
+    "video": "day1_clip06_20點",
+    "person": "陳爺爺",
+    "blip_verified": false,
+    "blip_confidence": 0.2
+  }
+]

@@ -46,7 +46,7 @@ class ByteTrackTracker:
 
         logger.info(f"Running tracking on {len(frames)} frames...")
         results = self.model.track(frames, tracker="bytetrack.yaml", persist=True,
-                                   verbose=False, conf=0.3)
+                                   verbose=False, conf=0.2)
 
         all_tracks = []
         all_objects = []

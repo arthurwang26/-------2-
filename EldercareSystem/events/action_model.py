@@ -21,22 +21,15 @@ from utils.reset_memory import ModelGuard
 
 logger = get_logger("action_stgcn")
 
-ACTION_CLASSES = ["Standing", "Walking", "Sitting", "Talking", "Arguing",
-                  "Reading", "Looking", "Leaving", "Unknown"]
+ACTION_CLASSES = ["躺著", "說話", "坐著", "站著", "走路", "Unknown"]
 
 NTU60_MAPPING = {
-    7: "Sitting",      # sitting down
-    8: "Standing",     # standing up
-    10: "Reading",     # reading
-    11: "Reading",     # writing
-    27: "Talking",     # make a phone call
-    28: "Reading",     # playing with phone
-    29: "Reading",     # typing on keyboard
-    49: "Arguing",     # punching/slapping
-    50: "Arguing",     # kicking other
-    51: "Arguing",     # pushing other
-    58: "Walking",     # walking towards
-    59: "Walking"      # walking apart
+    7: "坐著",      # sitting down
+    8: "站著",     # standing up
+    27: "說話",     # make a phone call
+    42: "躺著",     # falling
+    58: "走路",     # walking towards
+    59: "走路"      # walking apart
 }
 
 
@@ -216,6 +209,8 @@ class STGCNActionModel:
             if combined.sum() > 0:
                 final_action = ACTION_CLASSES[pred_idx]
                 final_conf = float(combined[pred_idx])
+                if final_conf < 0.4:
+                    final_action = "Unknown"
             else:
                 final_action = "Unknown"
                 final_conf = 0.0

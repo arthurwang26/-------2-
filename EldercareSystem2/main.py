@@ -29,9 +29,12 @@ logger = get_logger("main")
 EMOTION_LABELS = ['Anger', 'Contempt', 'Disgust', 'Fear', 'Happiness', 'Neutral', 'Sadness', 'Surprise']
 
 
-def extract_frames(video_path: str) -> List[np.ndarray]:
-    """Extract frames from video. Captures full clip."""
+def extract_frames(video_path: str) -> tuple:
+    """Extract frames from video and return original fps."""
     cap = cv2.VideoCapture(video_path)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    if not fps or fps <= 0:
+        fps = 8
     frames = []
     while cap.isOpened():
         ret, frame = cap.read()
@@ -39,7 +42,7 @@ def extract_frames(video_path: str) -> List[np.ndarray]:
             break
         frames.append(frame)
     cap.release()
-    return frames
+    return frames, int(fps)
 
 class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -69,16 +72,15 @@ def save_video(frames: List[np.ndarray], path: str, fps: int = 8):
 
 def merge_tracks_by_identity(identities: Dict[int, str],
                               skeletons: Dict[int, List[np.ndarray]],
-                              emotion_vectors: Dict[int, List[np.ndarray]],
                               tracks: List[List[Dict]]) -> tuple:
     """
     CRITICAL FIX: Merge fragmented track_ids belonging to the same person.
     
     ByteTrack assigns 10+ track_ids to the same person due to occlusions/turns.
-    This function merges all data (skeletons, emotions, track detections) into
+    This function merges all data (skeletons, track detections) into
     a single canonical track_id per person.
     
-    Returns: (merged_identities, merged_skeletons, merged_emotions, merged_tracks, canonical_map)
+    Returns: (merged_identities, merged_skeletons, merged_tracks, canonical_map)
     """
     # Group track_ids by person name
     name_to_tids = defaultdict(list)
@@ -112,16 +114,6 @@ def merge_tracks_by_identity(identities: Dict[int, str],
             merged_seq.extend(skeletons.get(tid, []))
         if merged_seq:
             merged_skeletons[canonical_tid] = merged_seq
-    
-    # Merge emotion vectors
-    merged_emotions = {}
-    for name, tids in name_to_tids.items():
-        canonical_tid = canonical_map[tids[0]]
-        merged_seq = []
-        for tid in tids:
-            merged_seq.extend(emotion_vectors.get(tid, []))
-        if merged_seq:
-            merged_emotions[canonical_tid] = merged_seq
     
     # Build merged identities
     merged_identities = {}
@@ -157,7 +149,7 @@ def merge_tracks_by_identity(identities: Dict[int, str],
     
     logger.info(f"Track merge complete: {sum(len(v) for v in name_to_tids.values())} track_ids -> {len(canonical_tids)} persons")
     
-    return merged_identities, merged_skeletons, merged_emotions, merged_tracks, canonical_map
+    return merged_identities, merged_skeletons, merged_tracks, canonical_map
 
 
 def process_pipeline():
@@ -182,13 +174,9 @@ def process_pipeline():
     from inference.tracker import ByteTrackTracker
     from inference.face import FaceIdentityMatcher
     from inference.pose import RTMPoseEstimator
-    from inference.emotion import EmotionRecognizer
     from inference.appearance_reid import AppearanceReID
     from events.action_model import MotionBERTActionModel
     from events.clip_hoi import CLIPHOIPredictor
-    from events.emotion_model import EmotionSequencePredictor
-    from events.anomaly_model import AnomalyDetector
-    from temporal.cross_day_gru import TemporalReasoningModel
     from database.kg_exporter import KnowledgeGraphExporter
     from database.ts_db import TimeSeriesDB
     from report.vlm_caption import SmolVLMCaptioner
@@ -199,9 +187,7 @@ def process_pipeline():
     ts_db = TimeSeriesDB()
 
     # Find videos
-    import random
-    all_video_files = sorted(glob.glob(str(cfg.raw_dir / "*.mp4")))
-    video_files = random.sample(all_video_files, min(3, len(all_video_files)))
+    video_files = sorted(glob.glob(str(cfg.raw_dir / "*.mp4")))
     if not video_files:
         logger.error(f"No videos found in {cfg.raw_dir}")
         return
@@ -209,13 +195,9 @@ def process_pipeline():
 
     # Global state
     events_by_clip = {}
-    anomaly_by_clip = {}
     captions_by_clip = {}
     skeletons_by_clip = {}
     all_baseline_skeletons = {}
-
-    # Keep face app reference for emotion module
-    face_app_ref = None
 
     # Global Appearance ReID to handle back-to-camera tracking
     reid_app = AppearanceReID()
@@ -226,7 +208,7 @@ def process_pipeline():
         logger.info(f"Processing [{vid_idx+1}/{len(video_files)}]: {vid_name}")
         logger.info(f"{'='*50}")
 
-        frames = extract_frames(video_path)
+        frames, fps = extract_frames(video_path)
         if not frames:
             logger.warning(f"No frames from {video_path}")
             continue
@@ -256,14 +238,13 @@ def process_pipeline():
                 all_obj_classes.add(o["class_name"])
         logger.info(f"Detected objects: {all_obj_classes}")
 
-        # 2. Face Identity Matching (v2.1: no greedy constraint)
+        # 2. Face Identity Matching
         with ModelGuard("Face Matcher"):
             face = FaceIdentityMatcher()
             face.load()
             identities = face.match_identities(frames, tracks)
-            face_app_ref = face.app  # Keep for emotion
         
-        # Cross-clip Appearance ReID (fixes back-to-camera without assumptions)
+        # Cross-clip Appearance ReID
         for tid in all_tids:
             for f_idx, frame_tracks in enumerate(tracks):
                 t_obj = next((t for t in frame_tracks if t["track_id"] == tid), None)
@@ -288,18 +269,11 @@ def process_pipeline():
             skeletons = pose.estimate(frames, tracks)
         logger.info(f"Skeletons extracted for tracks: {list(skeletons.keys())}")
 
-        # 4. Emotion Recognition
-        with ModelGuard("Emotion"):
-            emo = EmotionRecognizer()
-            emo.load()
-            emotion_vectors = emo.recognize(frames, tracks, face_app=face_app_ref)
-        face_app_ref = None  # Release
-
         # ===== v2.1 CRITICAL FIX: TRACK MERGING =====
         # Merge fragmented track_ids for the same person
-        (merged_identities, merged_skeletons, merged_emotions, 
+        (merged_identities, merged_skeletons, 
          merged_tracks, canonical_map) = merge_tracks_by_identity(
-            identities, skeletons, emotion_vectors, tracks)
+            identities, skeletons, tracks)
         
         # Use merged data from here on
         identities = merged_identities
@@ -354,22 +328,6 @@ def process_pipeline():
             h["person"] = name
             clip_events.append(h)
 
-        # 7. Emotion Sequence Prediction (GRU)
-        with ModelGuard("Emotion GRU"):
-            emo_model = EmotionSequencePredictor()
-            emo_model.load()
-            emotions = emo_model.predict(merged_emotions)
-
-        for tid, emo_result in emotions.items():
-            name = identities.get(tid, f"ID:{tid}")
-            if name == "Unknown":
-                continue
-            clip_events.append({
-                "video": vid_name, "track_id": tid, "person": name,
-                "type": "Emotion", "emotion": emo_result["emotion"],
-                "confidence": emo_result["confidence"]
-            })
-
         # ===== VLM CAPTION & GROUNDING =====
         with ModelGuard("VLM"):
             vlm = SmolVLMCaptioner()
@@ -402,7 +360,7 @@ def process_pipeline():
                 if i < len(sk_seq):
                     frame_skels[tid] = sk_seq[i]
             frame_actions = {tid: act["action"] for tid, act in actions.items()}
-            frame_emotions = {tid: emo["emotion"] for tid, emo in emotions.items()}
+            frame_emotions = {}
             frame_objs = objects[i] if i < len(objects) else []
 
             v = draw_frame(
@@ -417,52 +375,20 @@ def process_pipeline():
             vis_frames.append(v)
 
         vis_path = str(cfg.output_dir / "visuals" / f"{vid_name}_vis.mp4")
-        save_video(vis_frames, vis_path)
+        save_video(vis_frames, vis_path, fps=fps)
         logger.info(f"Visualization saved: {vis_path}")
 
         # Log clip summary
         logger.info(f"--- {vid_name} Summary ---")
         for ev in clip_events:
-            logger.info(f"  {ev['person']}: {ev['type']}={ev.get('action', ev.get('emotion', ''))}")
+            logger.info(f"  {ev['person']}: {ev['type']}={ev.get('action', '')}")
             
         # V5.1 Module-level comprehensive debug outputs
         save_debug_json(vid_name, "tracks.json", tracks)
         save_debug_json(vid_name, "objects.json", objects)
         save_debug_json(vid_name, "skeletons.json", skeletons)
         save_debug_json(vid_name, "actions.json", actions)
-        save_debug_json(vid_name, "emotions.json", emotions)
         save_debug_json(vid_name, "clip_hoi.json", clip_events)
-
-    # ===== ANOMALY DETECTION (Self-supervised) =====
-    logger.info("\n--- Phase: Self-Supervised Anomaly Detection ---")
-
-    with ModelGuard("Anomaly AE"):
-        ae = AnomalyDetector()
-        ae.load()
-
-        if all_baseline_skeletons:
-            ae.train_baseline(all_baseline_skeletons, epochs=30)
-
-        for vid_name in sorted(skeletons_by_clip.keys()):
-            skel = skeletons_by_clip[vid_name]
-            scores = ae.predict(skel)
-            avg_score = np.mean(list(scores.values())) if scores else 0.0
-            anomaly_by_clip[vid_name] = float(avg_score)
-            ts_db.insert_anomaly(vid_name, avg_score)
-            logger.info(f"{vid_name}: anomaly_score={avg_score:.4f}")
-
-    # ===== CROSS-DAY TEMPORAL REASONING =====
-    logger.info("\n--- Phase: Cross-Day Temporal Reasoning ---")
-    with ModelGuard("BiGRU"):
-        temporal = TemporalReasoningModel()
-        temporal.load()
-        reasoning = temporal.reason(events_by_clip, anomaly_by_clip)
-
-    risk_score = reasoning["risk_score"]
-    trend = reasoning["behavior_trend"]
-    ts_db.insert_temporal_risk(risk_score, trend)
-    logger.info(f"Risk Score: {risk_score:.4f}, Trend: {trend}")
-
     # ===== LLM REPORT GENERATION =====
     logger.info("\n--- Phase: LLM Report Generation ---")
     with ModelGuard("Qwen3"):
@@ -470,9 +396,6 @@ def process_pipeline():
         reporter.load()
         report = reporter.generate_report(
             events_by_clip=events_by_clip,
-            anomaly_by_clip=anomaly_by_clip,
-            risk_score=risk_score,
-            trend=trend,
             captions_by_clip=captions_by_clip
         )
 

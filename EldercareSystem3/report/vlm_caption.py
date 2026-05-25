@@ -67,7 +67,7 @@ class SmolVLMCaptioner:
                 continue
 
             image = Image.fromarray(frames[i][..., ::-1])
-            prompt = "Describe this scene briefly. Focus on people, their actions, objects, and emotional state."
+            prompt = "Describe this scene briefly. Focus on people, their social interactions (e.g. talking, arguing, ignoring each other, greeting), their specific actions (e.g. walking, sitting, reading), objects, and their emotional state."
 
             messages = [{"role": "user", "content": [
                 {"type": "image"}, {"type": "text", "text": prompt}]}]

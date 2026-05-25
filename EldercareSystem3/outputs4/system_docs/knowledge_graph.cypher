@@ -18,55 +18,48 @@
 // MATCH (n) DETACH DELETE n;
 
 // === 建立時間軸 (Clip 節點) ===
-MERGE (c_day1_clip01_9點:Clip {name: 'day1_clip01_9點', day: 'day1', time: '09:00:00'});
-MERGE (c_day1_clip02_11點:Clip {name: 'day1_clip02_11點', day: 'day1', time: '11:00:00'});
-MERGE (c_day1_clip05_17點:Clip {name: 'day1_clip05_17點', day: 'day1', time: '17:00:00'});
+MERGE (c_day1_clip03_13點:Clip {name: 'day1_clip03_13點', day: 'day1', time: '13:00:00'});
+MERGE (c_day1_clip06_20點:Clip {name: 'day1_clip06_20點', day: 'day1', time: '20:00:00'});
+MERGE (c_day2_clip02_11點:Clip {name: 'day2_clip02_11點', day: 'day2', time: '11:00:00'});
 
 // === 時間順序連接 Clip ===
-MATCH (c1:Clip {name: 'day1_clip01_9點'}), (c2:Clip {name: 'day1_clip02_11點'})
+MATCH (c1:Clip {name: 'day1_clip03_13點'}), (c2:Clip {name: 'day1_clip06_20點'})
 MERGE (c1)-[:NEXT_CLIP]->(c2);
-MATCH (c1:Clip {name: 'day1_clip02_11點'}), (c2:Clip {name: 'day1_clip05_17點'})
+MATCH (c1:Clip {name: 'day1_clip06_20點'}), (c2:Clip {name: 'day2_clip02_11點'})
 MERGE (c1)-[:NEXT_CLIP]->(c2);
 
-// --- day1_clip02_11點 ---
+// --- day2_clip02_11點 ---
 MERGE (p:Person {name: '陳爺爺'});
-MATCH (p:Person {name: '陳爺爺'}), (c:Clip {name: 'day1_clip02_11點'})
+MATCH (p:Person {name: '陳爺爺'}), (c:Clip {name: 'day2_clip02_11點'})
 MERGE (p)-[:APPEARS_IN]->(c);
-MERGE (a:Action {name: 'shaving head'});
-MERGE (p)-[:PERFORMS {clip: 'day1_clip02_11點', time: '11:00:00'}]->(a);
-MERGE (e:Emotion {name: 'Sadness'});
-MATCH (p:Person {name: '陳爺爺'}), (e:Emotion {name: 'Sadness'})
-MERGE (p)-[:FEELS {clip: 'day1_clip02_11點', confidence: 0.18, time: '11:00:00'}]->(e);
+MERGE (a:Action {name: 'laughing'});
+MERGE (p)-[:PERFORMS {clip: 'day2_clip02_11點', time: '11:00:00'}]->(a);
 MERGE (p:Person {name: '王奶奶'});
-MATCH (p:Person {name: '王奶奶'}), (c:Clip {name: 'day1_clip02_11點'})
+MATCH (p:Person {name: '王奶奶'}), (c:Clip {name: 'day2_clip02_11點'})
 MERGE (p)-[:APPEARS_IN]->(c);
-MERGE (a:Action {name: 'dying hair'});
-MERGE (p)-[:PERFORMS {clip: 'day1_clip02_11點', time: '11:00:00'}]->(a);
-MERGE (e:Emotion {name: 'Neutral'});
-MATCH (p:Person {name: '王奶奶'}), (e:Emotion {name: 'Neutral'})
-MERGE (p)-[:FEELS {clip: 'day1_clip02_11點', confidence: 0.16, time: '11:00:00'}]->(e);
+MERGE (a:Action {name: 'petting cat'});
+MERGE (p)-[:PERFORMS {clip: 'day2_clip02_11點', time: '11:00:00'}]->(a);
 
-// --- day1_clip05_17點 ---
+// --- day1_clip06_20點 ---
 MERGE (p:Person {name: '陳爺爺'});
-MATCH (p:Person {name: '陳爺爺'}), (c:Clip {name: 'day1_clip05_17點'})
+MATCH (p:Person {name: '陳爺爺'}), (c:Clip {name: 'day1_clip06_20點'})
 MERGE (p)-[:APPEARS_IN]->(c);
-MERGE (a:Action {name: 'baby waking up'});
-MERGE (p)-[:PERFORMS {clip: 'day1_clip05_17點', time: '17:00:00'}]->(a);
+MERGE (a:Action {name: 'shaking head'});
+MERGE (p)-[:PERFORMS {clip: 'day1_clip06_20點', time: '20:00:00'}]->(a);
 MERGE (p:Person {name: '王奶奶'});
-MATCH (p:Person {name: '王奶奶'}), (c:Clip {name: 'day1_clip05_17點'})
+MATCH (p:Person {name: '王奶奶'}), (c:Clip {name: 'day1_clip06_20點'})
 MERGE (p)-[:APPEARS_IN]->(c);
-MERGE (a:Action {name: 'reading book'});
-MERGE (p)-[:PERFORMS {clip: 'day1_clip05_17點', time: '17:00:00'}]->(a);
-MERGE (e:Emotion {name: 'Disgust'});
-MATCH (p:Person {name: '王奶奶'}), (e:Emotion {name: 'Disgust'})
-MERGE (p)-[:FEELS {clip: 'day1_clip05_17點', confidence: 0.16, time: '17:00:00'}]->(e);
+MERGE (a:Action {name: 'massaging back'});
+MERGE (p)-[:PERFORMS {clip: 'day1_clip06_20點', time: '20:00:00'}]->(a);
 
-// --- day1_clip01_9點 ---
+// --- day1_clip03_13點 ---
 MERGE (p:Person {name: '王奶奶'});
-MATCH (p:Person {name: '王奶奶'}), (c:Clip {name: 'day1_clip01_9點'})
+MATCH (p:Person {name: '王奶奶'}), (c:Clip {name: 'day1_clip03_13點'})
 MERGE (p)-[:APPEARS_IN]->(c);
-MERGE (a:Action {name: 'folding clothes'});
-MERGE (p)-[:PERFORMS {clip: 'day1_clip01_9點', time: '09:00:00'}]->(a);
-MERGE (e:Emotion {name: 'Sadness'});
-MATCH (p:Person {name: '王奶奶'}), (e:Emotion {name: 'Sadness'})
-MERGE (p)-[:FEELS {clip: 'day1_clip01_9點', confidence: 0.18, time: '09:00:00'}]->(e);
+MERGE (a:Action {name: 'shaking head'});
+MERGE (p)-[:PERFORMS {clip: 'day1_clip03_13點', time: '13:00:00'}]->(a);
+MERGE (p:Person {name: '陳爺爺'});
+MATCH (p:Person {name: '陳爺爺'}), (c:Clip {name: 'day1_clip03_13點'})
+MERGE (p)-[:APPEARS_IN]->(c);
+MERGE (a:Action {name: 'knitting'});
+MERGE (p)-[:PERFORMS {clip: 'day1_clip03_13點', time: '13:00:00'}]->(a);

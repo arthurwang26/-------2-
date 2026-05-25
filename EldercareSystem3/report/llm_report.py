@@ -116,15 +116,15 @@ class QwenReporter:
         return "\n".join(lines)
 
     def generate_report(self, events_by_clip: Dict[str, List[Dict]],
-                        anomaly_by_clip: Dict[str, float],
-                        risk_score: float, trend: str,
-                        captions_by_clip: Dict[str, List[Dict]]) -> str:
+                        captions_by_clip: Dict[str, List[Dict]],
+                        vlm_captions_by_clip: Dict[str, List[Dict]],
+                        gemini_by_clip: Dict[str, str] = None,
+                        kg_text: str = "") -> str:
         if self.llm is None:
             raise RuntimeError("Model is not loaded.")
 
         logger.info("Generating Detailed Per-Clip Chinese Structured Report...")
 
-        # 建立報告資料夾 (Clean up is now handled exclusively by main.py)
         base_dir = cfg.output_dir
         llm_dir = base_dir / "llm_reports"
         per_clip_dir = llm_dir / "per_clip"
@@ -138,108 +138,156 @@ class QwenReporter:
         clip_names = sorted(list(events_by_clip.keys()))
         all_clips_context = self._format_all_clips_context(events_by_clip)
         
-        # Helper to format VLM captions for a clip
-        def format_captions(clip_name):
-            caps = captions_by_clip.get(clip_name, [])
+        def format_captions(clip_name, caps_dict, name):
+            caps = caps_dict.get(clip_name, [])
             if not caps:
-                return "無 VLM 視覺描述資料。"
+                return f"無 {name} 視覺描述資料。"
             return "\n".join([f"Frame {c.get('frame_idx', '?')}: {c.get('caption', '')}" for c in caps])
         
-        # 1. 針對每個 clip，要求 LLM 生成王奶奶與陳爺爺的超詳細報告
         for clip in clip_names:
             clip_context = self._format_all_clips_context({clip: events_by_clip[clip]})
-            vlm_context = format_captions(clip)
+            blip_context = format_captions(clip, captions_by_clip, "BLIP")
+            vlm_context = format_captions(clip, vlm_captions_by_clip, "VLM")
             
+            # --- 1. Generate Main Report (No GT) ---
             prompt = f"""<|im_start|>system
-你是長照監控系統的嚴謹分析師。你需要根據提供的資料，輸出「適度詳細的敘述性報表」。
+你是長照中心院長。你需要根據提供的資料，輸出兩份不同用途的報表。絕對不要使用任何外部正確解答(Ground Truth)來推理。
 
 【核心規則與限制】
-1. **結構嚴格劃分**：你必須嚴格按照以下三個區塊輸出，區塊名稱請加上雙冒號（例如： === 感測器節點敘述 === ）。
-2. **VLM 獨立原則**：VLM（視覺語言模型）的結果是完全獨立的。你在撰寫「感測器節點敘述」時，**絕對不可以**參考 VLM 的結論來推斷或修正感測器的錯誤。感測器看到什麼，你就詳細敘述什麼。
-3. **最後才判斷 Ground Truth**：在第三個區塊才拿出 Ground Truth 來做比較與錯誤分析。
-4. **HOI 雙架構比較**：系統目前有人機互動的雙重 AI 架構 (HOI-MLP 與 HOI-CLIP)，請特別關注兩者預測結果的差異。
+1. **結構嚴格劃分**：你必須嚴格按照以下兩個區塊輸出。
+2. **家屬報告區塊**：用語要像長照中心院長讓家屬知道老人在幹嘛的感覺，語氣要自然像真人回答，不能太生硬。絕對遵守以下限制：
+   - 只能敘述真實確認發生的事，絕對不能使用「可能」、「或許」、「似乎」等猜測性字眼。
+   - 絕對不能分析或提及臉部表情。
+   - 絕對不能使用「我們覺得」、「我們認為」等主觀感受字眼。
+   - 絕對不要透露技術層面的除錯資訊。
+3. **工程師對比區塊**：必須明確列出各個模型的原始輸出（行為辨識、人與物互動、VLM判斷、BLIP判斷）。
+4. **多重驗證 (Multiple Verification)**：在工程師區塊中，所有的感測輸出(Action, HOI)都只是初步參考，最終的行為判斷必須由你進行邏輯推理後得出，絕對不能盲目相信單一感測器。請根據 VLM 和 BLIP 等視覺描述來做最終裁定，輸出你認為最合理的真實行為。
 
-【Ground Truth 參考】
-{ground_truth_text}
 <|im_end|>
 <|im_start|>user
 當前影片片段：{clip}
 
-前端神經網路感測紀錄 (System Nodes) [包含 HOI-MLP 與 HOI-CLIP]：
+前端感測紀錄與去幻覺驗證結果：
 {clip_context}
 
-VLM 視覺描述紀錄 (VLM Nodes)：
+BLIP 視覺描述紀錄：
+{blip_context}
+
+SmolVLM 視覺描述紀錄：
 {vlm_context}
 
-请严格依照以下格式输出适度详细的叙述：
+知識圖譜關聯：
+{kg_text}
 
-=== 感測器節點敘述 ===
-(詳細敘述前端神經網路偵測到的人物、動作、情緒、物件互動軌跡。不要提及 Ground Truth，也不要提及 VLM。)
+請嚴格依照以下格式輸出：
 
-=== VLM 視覺描述 ===
-(詳細敘述 VLM 模型看到的畫面內容，並用文字生動描繪出來。)
+=== 家屬報告 ===
+(以溫暖、日常的口吻，告訴家屬長輩在這個片段中正在做什麼、精神狀況如何。不要提及任何AI、感測器或系統字眼。)
 
-=== 誤差與對比分析 ===
-(1. 感測器 vs 正確答案：指出兩者的差異，並分析感測器會發生此工程錯誤的原因。
- 2. VLM vs 正確答案：指出 VLM 描述與真實情況的差異。)
+=== 工程師對比區塊 ===
+【模型原始輸出】
+- 行為辨識 (Action): (列出感測紀錄中的 Action 結果)
+- 人與物互動 (HOI): (列出感測紀錄中的 HOI 結果)
+- VLM 判斷: (列出 SmolVLM 的描述)
+- BLIP 判斷: (列出 BLIP 的描述)
+
+【多重驗證推理】
+(分析上述來源是否有衝突？何者比較合理？並給出最終推論的真實行為判斷。)
+
 <|im_end|>
 <|im_start|>assistant
 """
             try:
                 if isinstance(self.llm, str):
-                    report = f"=== 感測器節點敘述 ===\n測試敘述。\n=== VLM 視覺描述 ===\n測試。\n=== 誤差與對比分析 ===\n測試分析。"
+                    report = f"=== 家屬報告 ===\n長輩今天狀況良好。\n=== 工程師對比區塊 ===\n測試分析。"
                 else:
-                    response = self.llm(prompt, max_tokens=1200, temperature=0.2, top_p=0.9, stop=["<|im_end|>"])
+                    response = self.llm(prompt, max_tokens=1500, temperature=0.2, top_p=0.9, stop=["<|im_end|>"])
                     report = response["choices"][0]["text"].strip()
                     if "<think>" in report:
                         report = re.sub(r'<think>.*?</think>', '', report, flags=re.DOTALL).strip()
                 
                 logger.info(f"Generated concise report for {clip}")
                 
-                # 1. 儲存每個 clip 的獨立檔案 (per_clip)
-                clip_file_path = per_clip_dir / f"{clip}.txt"
-                with open(clip_file_path, "w", encoding="utf-8") as f:
-                    f.write(report)
+                parts = report.split("=== 工程師對比區塊 ===")
+                family_report = parts[0].replace("=== 家屬報告 ===", "").strip()
+                eng_report = "=== 工程師對比區塊 ===\n" + parts[1].strip() if len(parts) > 1 else ""
                 
-                # 2. 依照天數合併檔案
                 day_match = re.search(r'(day\d+)', clip, re.IGNORECASE)
                 day_str = day_match.group(1).lower() if day_match else "dayX"
                 
-                # 同時寫入王奶奶與陳爺爺的檔案
+                # Global Append
                 for person in ["王奶奶", "陳爺爺"]:
-                    person_file_path = llm_dir / f"{person}_{day_str}.txt"
-                    with open(person_file_path, "a", encoding="utf-8") as f:
-                        f.write(f"\n--- 【來源：{clip}】 ---\n{report}\n")
-                        
+                    with open(llm_dir / f"{person}_{day_str}_家屬報告.txt", "a", encoding="utf-8") as f:
+                        f.write(f"{family_report}\n\n")
+                    if eng_report:
+                        with open(llm_dir / f"{person}_{day_str}_工程師除錯.txt", "a", encoding="utf-8") as f:
+                            f.write(f"\n--- 【來源：{clip}】 ---\n{eng_report}\n")
+                            
+                # Per Clip Save (Combined)
+                with open(per_clip_dir / f"{clip}.txt", "w", encoding="utf-8") as f:
+                    f.write(f"=== 家屬報告 ===\n{family_report}\n\n{eng_report}")
+                            
             except Exception as e:
                 logger.error(f"Generation failed for {clip}: {e}")
+                report = "Error"
+                eng_report = "Error"
 
-        # 2. 生成最終總結報告
-        final_prompt = f"""<|im_start|>system
-你是長照監控系統的總分析師。你需要根據「所有影片片段的整合資料」，寫出一段總結性的跨片段因果推理與全局系統除錯分析報告。
+            # --- 2. Generate GT Analysis Report ---
+            gt_prompt = f"""<|im_start|>system
+你是系統評估工程師。你的任務是將「系統多重驗證後的推論結果」與「真實答案 (Ground Truth)」進行嚴格比對，並產出差異分析報告。
 
-【核心分析要求】
-1. **全局推理 (Day1 -> Day2 -> Day3)**：梳理每一天的事件脈絡。
-2. **情緒變化脈絡與感測誤差總結**：分析人物情緒隨時間、事件的演化，並特別總結本系統前端感測器（如情緒辨識、動作辨識）在這些天的表現中，最容易出錯的盲點是什麼？為什麼？
-3. **人物關係轉變**：詳細推演衝突、冷戰、試探、和好的互動因果。
-4. **趨勢延續**：基於歷史軌跡預測後續行為。
-5. **跨 Clip 來源標註**：在提到關鍵事件或系統誤判時，必須標註來源（例如：根據 clip02...）。
+<|im_end|>
+<|im_start|>user
+當前影片片段：{clip}
+
+【系統推論結果】
+{eng_report}
 
 【正確答案參考 (Ground Truth)】
 {ground_truth_text}
+
+請針對此片段，比對系統推論與 Ground Truth 的差異，指出系統是否誤判了行為或情緒，並分析可能的盲點原因。
+請直接輸出分析內容。
+<|im_end|>
+<|im_start|>assistant
+"""
+            try:
+                if isinstance(self.llm, str):
+                    gt_analysis = "GT 差異分析測試。"
+                else:
+                    response = self.llm(gt_prompt, max_tokens=1000, temperature=0.2, top_p=0.9, stop=["<|im_end|>"])
+                    gt_analysis = response["choices"][0]["text"].strip()
+                    if "<think>" in gt_analysis:
+                        gt_analysis = re.sub(r'<think>.*?</think>', '', gt_analysis, flags=re.DOTALL).strip()
+                
+                logger.info(f"Generated GT Analysis for {clip}")
+                
+                for person in ["王奶奶", "陳爺爺"]:
+                    with open(llm_dir / f"{person}_{day_str}_GT差異分析.txt", "a", encoding="utf-8") as f:
+                        f.write(f"\n--- 【來源：{clip}】 ---\n{gt_analysis}\n")
+                        
+            except Exception as e:
+                logger.error(f"GT Analysis failed for {clip}: {e}")
+
+        # --- 3. Final Report (No GT) ---
+        final_prompt = f"""<|im_start|>system
+你是長照監控系統的總分析師。你需要根據「所有影片片段的整合資料」，寫出一段總結性的跨片段因果推理與全局系統除錯分析報告。絕對不要參考外部的真實答案，僅憑系統感測紀錄來推理。
+
+【核心分析要求】
+1. **全局推理 (Day1 -> Day2 -> Day3)**：梳理每一天的事件脈絡。
+2. **人物關係轉變**：詳細推演衝突、冷戰、試探、和好的互動因果。
+3. **趨勢延續**：基於歷史軌跡預測後續行為。
+4. **跨 Clip 來源標註**：在提到關鍵事件或系統誤判時，必須標註來源（例如：根據 clip02...）。
+
 <|im_end|>
 <|im_start|>user
 全部影片的前端感測紀錄整合：
 {all_clips_context}
 
-=== 跨天趨勢 ===
-- 風險分數: {risk_score:.4f}
-- 行為趨勢: {trend}
-
 請產出最終報告：
 === 最終報告 ===
-[跨片段人際因果推理、全局總結與系統誤差分析]
-(詳細分析 Day1 到後續天數的情緒演進、關係轉變與趨勢延續，並點出系統感測器的盲點，務必標示事件來源)
+[跨片段人際因果推理與全局總結]
+(詳細分析 Day1 到後續天數的情緒演進、關係轉變與趨勢延續，務必標示事件來源)
 === 最終報告_END ===
 <|im_end|>
 <|im_start|>assistant
@@ -248,20 +296,51 @@ VLM 視覺描述紀錄 (VLM Nodes)：
             if isinstance(self.llm, str):
                 final_report_text = "=== 最終報告 ===\n這是測試的最終報告。\n=== 最終報告_END ==="
             else:
-                response = self.llm(final_prompt, max_tokens=3000, temperature=0.2, top_p=0.9, stop=["<|im_end|>"])
+                response = self.llm(final_prompt, max_tokens=2500, temperature=0.2, top_p=0.9, stop=["<|im_end|>"])
                 final_report_text = response["choices"][0]["text"].strip()
                 if "<think>" in final_report_text:
                     final_report_text = re.sub(r'<think>.*?</think>', '', final_report_text, flags=re.DOTALL).strip()
             
-            # 直接存檔，不再依賴 regex（避免截斷時 _END 標籤消失導致匹配失敗）
             with open(llm_dir / "最終報告.txt", "w", encoding="utf-8") as f:
                 f.write(final_report_text)
             logger.info("Saved Final Report (最終報告.txt).")
         except Exception as e:
             logger.error(f"Final report generation failed: {e}")
+            final_report_text = "Error"
+            
+        # --- 4. Final Report GT Analysis ---
+        final_gt_prompt = f"""<|im_start|>system
+你是系統評估工程師。你的任務是將「最終報告的全局推理」與「真實答案 (Ground Truth)」進行嚴格比對，產出整體的盲點與誤差分析。
+
+<|im_end|>
+<|im_start|>user
+【系統最終報告】
+{final_report_text}
+
+【正確答案參考 (Ground Truth)】
+{ground_truth_text}
+
+請綜合比對系統全局推理與 Ground Truth 的差異，指出系統在跨片段情緒演進與人物關係推演上的主要盲點與失誤。
+請直接輸出分析內容。
+<|im_end|>
+<|im_start|>assistant
+"""
+        try:
+            if isinstance(self.llm, str):
+                final_gt_analysis = "最終報告 GT 差異分析測試。"
+            else:
+                response = self.llm(final_gt_prompt, max_tokens=1500, temperature=0.2, top_p=0.9, stop=["<|im_end|>"])
+                final_gt_analysis = response["choices"][0]["text"].strip()
+                if "<think>" in final_gt_analysis:
+                    final_gt_analysis = re.sub(r'<think>.*?</think>', '', final_gt_analysis, flags=re.DOTALL).strip()
+            
+            with open(llm_dir / "最終報告_GT差異分析.txt", "w", encoding="utf-8") as f:
+                f.write(final_gt_analysis)
+            logger.info("Saved Final GT Analysis (最終報告_GT差異分析.txt).")
+        except Exception as e:
+            logger.error(f"Final GT Analysis failed: {e}")
 
         return final_report_text
-
     def _mock_report(self, unique_days):
         res = ""
         for day in unique_days:

@@ -153,10 +153,29 @@ class MotionBERTActionModel:
             logits = self.model(input_tensor)
             # Pool over frames (F) and joints (J)
             logits = logits.mean(dim=(1, 2))  # -> (B, num_classes)
-            pred_idx = torch.argmax(logits, dim=1).item()
+            
+            probs = torch.softmax(logits, dim=1)
+            max_prob, pred_idx_tensor = torch.max(probs, dim=1)
+            max_prob = max_prob.item()
+            pred_idx = pred_idx_tensor.item()
+            
+        if max_prob < 0.2:
+            return "Unknown"
             
         if 0 <= pred_idx < len(NTU60_CLASSES):
-            return NTU60_CLASSES[pred_idx]
+            raw_action = NTU60_CLASSES[pred_idx]
+            if raw_action == "falling":
+                return "躺著"
+            elif raw_action in ["make a phone call", "playing with phone/tablet", "point finger at the other person"]:
+                return "說話"
+            elif raw_action == "sitting down":
+                return "坐著"
+            elif raw_action == "standing up":
+                return "站著"
+            elif raw_action in ["walking towards each other", "walking apart from each other", "staggering"]:
+                return "走路"
+            else:
+                return "Unknown"
         return "Unknown"
 
 if __name__ == "__main__":

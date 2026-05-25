@@ -15,7 +15,8 @@ class AppearanceReID:
         x1, y1, x2, y2 = map(int, bbox)
         # Crop the person
         crop = image[max(0,y1):min(image.shape[0],y2), max(0,x1):min(image.shape[1],x2)]
-        if crop.size == 0:
+        # Ignore extremely small or invalid crops (blurry artifacts)
+        if crop.size == 0 or crop.shape[0] < 50 or crop.shape[1] < 20:
             return np.zeros((512,), dtype=np.float32)
         
         # Convert to HSV
@@ -37,7 +38,7 @@ class AppearanceReID:
         if len(self.gallery[name]) > 50:
             self.gallery[name] = self.gallery[name][-50:]
 
-    def identify(self, hist: np.ndarray, threshold: float = 0.5) -> str:
+    def identify(self, hist: np.ndarray, threshold: float = 0.75) -> str:
         """Identify an unknown histogram based on the gallery."""
         if np.sum(hist) == 0 or not self.gallery:
             return "Unknown"
