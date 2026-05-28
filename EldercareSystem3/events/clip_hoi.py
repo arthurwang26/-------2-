@@ -1,6 +1,6 @@
 """
 Zero-Shot HOI Detection using OpenAI CLIP (ViT-B/32).
-Performs continuous 30-frame interval sampling.
+Dynamically generates prompts based on YOLO-detected objects.
 """
 import sys
 from pathlib import Path
@@ -17,33 +17,51 @@ from utils.reset_memory import ModelGuard
 
 logger = get_logger("clip_hoi")
 
-# Prompts for zero-shot classification
-HOI_PROMPTS = [
-    "A person sitting on a couch",
-    "A person drinking from a cup",
-    "A person watching TV",
-    "A person reading a book",
-    "A person using a smartphone",
-    "A person falling down",
-    "A person eating food",
-    "A person cooking in the kitchen",
-    "A person standing idle",
-    "A person walking"
-]
-
-# Map prompt to structured event
-HOI_MAPPING = {
-    "A person sitting on a couch": ("Sitting_On", "Couch"),
-    "A person drinking from a cup": ("Drinking_From", "Cup"),
-    "A person watching TV": ("Watching", "TV"),
-    "A person reading a book": ("Reading", "Book"),
-    "A person using a smartphone": ("Using", "Smartphone"),
-    "A person falling down": ("Falling", "Ground"),
-    "A person eating food": ("Eating", "Food"),
-    "A person cooking in the kitchen": ("Cooking", "Kitchen"),
-    "A person standing idle": (None, None),
-    "A person walking": (None, None)
+# Base action templates per object category
+OBJECT_ACTION_TEMPLATES = {
+    "cup": [
+        ("A person drinking from a cup", "Drinking_From", "Cup"),
+        ("A person holding a cup", "Holding", "Cup"),
+    ],
+    "bottle": [
+        ("A person drinking from a bottle", "Drinking_From", "Bottle"),
+        ("A person holding a bottle", "Holding", "Bottle"),
+    ],
+    "book": [
+        ("A person reading a book", "Reading", "Book"),
+        ("A person holding a book", "Holding", "Book"),
+    ],
+    "tv": [
+        ("A person watching television", "Watching", "TV"),
+    ],
+    "remote": [
+        ("A person using a remote control", "Using", "Remote"),
+        ("A person holding a remote control", "Holding", "Remote"),
+    ],
+    "cell phone": [
+        ("A person using a phone", "Using", "Phone"),
+        ("A person looking at a phone", "Looking_At", "Phone"),
+    ],
+    "chair": [
+        ("A person sitting on a chair", "Sitting_On", "Chair"),
+    ],
+    "couch": [
+        ("A person sitting on a couch", "Sitting_On", "Couch"),
+    ],
+    "dining table": [
+        ("A person sitting at a dining table", "Sitting_At", "Table"),
+        ("A person eating at a table", "Eating_At", "Table"),
+    ],
+    "vase": [
+        ("A person looking at a vase", "Looking_At", "Vase"),
+    ],
 }
+
+# Baseline prompts (always included as negative anchors)
+BASELINE_PROMPTS = [
+    "A person standing idle",
+    "A person walking",
+]
 
 
 class CLIPHOIPredictor:
@@ -51,45 +69,70 @@ class CLIPHOIPredictor:
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = None
         self.preprocess = None
-        self.text_features = None
+        self._clip_module = None
 
     def load(self):
         if self.model is not None:
             return
             
         import clip
+        self._clip_module = clip
         logger.info(f"Loading CLIP (ViT-B/32) on {self.device} for Zero-Shot HOI...")
         self.model, self.preprocess = clip.load("ViT-B/32", device=self.device)
         self.model.eval()
-        
-        # Precompute text embeddings
-        text_tokens = clip.tokenize(HOI_PROMPTS).to(self.device)
-        with torch.no_grad():
-            self.text_features = self.model.encode_text(text_tokens)
-            self.text_features /= self.text_features.norm(dim=-1, keepdim=True)
-            
         logger.info("CLIP loaded and text prompts encoded.")
 
     def unload(self):
         self.model = None
         self.preprocess = None
-        self.text_features = None
+        self._clip_module = None
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
 
-    def predict(self, frames: List[np.ndarray], tracks: Dict[int, List[Dict]], sample_rate: int = 30) -> List[Dict]:
+    def _build_prompts_from_objects(self, detected_objects: set):
+        """Dynamically build CLIP text prompts based on YOLO-detected objects."""
+        prompts = list(BASELINE_PROMPTS)
+        mapping = {}
+        for p in BASELINE_PROMPTS:
+            mapping[p] = (None, None)
+        
+        for obj_class in detected_objects:
+            templates = OBJECT_ACTION_TEMPLATES.get(obj_class, [])
+            for prompt_text, action, obj_name in templates:
+                if prompt_text not in mapping:
+                    prompts.append(prompt_text)
+                    mapping[prompt_text] = (action, obj_name)
+        
+        return prompts, mapping
+
+    def predict(self, frames: List[np.ndarray], tracks, objects_per_frame: List[List[Dict]] = None, sample_rate: int = 30) -> List[Dict]:
         """
-        Continuous interval sampling: Runs CLIP on bounding box crops every `sample_rate` frames.
-        Returns deduplicated unique events.
+        Dynamic HOI prediction using YOLO-detected objects to build CLIP prompts.
         """
         if self.model is None or not frames or not tracks:
             return []
+        
+        # Collect all unique detected object classes across frames
+        detected_objects = set()
+        if objects_per_frame:
+            for frame_objs in objects_per_frame:
+                for obj in frame_objs:
+                    detected_objects.add(obj.get("class_name", ""))
+        
+        # Build dynamic prompts
+        prompts, mapping = self._build_prompts_from_objects(detected_objects)
+        logger.info(f"Dynamic HOI prompts ({len(prompts)}): {[p for p in prompts if mapping.get(p, (None,))[0] is not None]}")
+        
+        # Encode text features
+        clip = self._clip_module
+        text_tokens = clip.tokenize(prompts).to(self.device)
+        with torch.no_grad():
+            text_features = self.model.encode_text(text_tokens)
+            text_features /= text_features.norm(dim=-1, keepdim=True)
             
         hoi_events = []
         unique_events = set()
         
-        # We only sample frames every `sample_rate` frames (default: 30)
-        # This solves the issue of missing interactions and removes reliance on rule engines.
         frame_indices = list(range(0, len(frames), sample_rate))
         if len(frames) - 1 not in frame_indices:
             frame_indices.append(len(frames) - 1)
@@ -116,7 +159,6 @@ class CLIPHOIPredictor:
                 if crop.size == 0:
                     continue
                     
-                # RGB conversion for PIL
                 crop_rgb = crop[:, :, ::-1]
                 pil_img = Image.fromarray(crop_rgb)
                 
@@ -126,16 +168,15 @@ class CLIPHOIPredictor:
                     image_features = self.model.encode_image(img_tensor)
                     image_features /= image_features.norm(dim=-1, keepdim=True)
                     
-                    similarity = (100.0 * image_features @ self.text_features.T).softmax(dim=-1)
+                    similarity = (100.0 * image_features @ text_features.T).softmax(dim=-1)
                     val, idx = similarity[0].topk(1)
                     
                 best_idx = idx.item()
                 conf = val.item()
                 
-                # Threshold for valid HOI (CLIP zero-shot confidence)
                 if conf > 0.4:
-                    prompt = HOI_PROMPTS[best_idx]
-                    action, obj = HOI_MAPPING[prompt]
+                    prompt = prompts[best_idx]
+                    action, obj = mapping.get(prompt, (None, None))
                     if action and obj:
                         event_key = f"{track_id}_{action}_{obj}"
                         if event_key not in unique_events:
@@ -146,10 +187,13 @@ class CLIPHOIPredictor:
                                 "object": obj,
                                 "track_id": track_id,
                                 "frame_idx": f_idx,
+                                "start_frame": f_idx,
+                                "end_frame": f_idx,
                                 "confidence": round(float(conf), 3)
                             })
                             
         return hoi_events
+
 
 if __name__ == "__main__":
     with ModelGuard("CLIP"):

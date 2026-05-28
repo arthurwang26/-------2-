@@ -144,9 +144,8 @@ def merge_tracks_by_identity(identities: Dict[int, str],
                     new_frame_tracks.append(new_t)
             else:
                 # Unknown person: only keep if it has some skeleton data
-                name = identities.get(tid, "Unknown")
-                if name != "Unknown":
-                    new_frame_tracks.append(t)
+                # FIX: Check if name is Unknown OR it is not in identities yet
+                new_frame_tracks.append(t)
         merged_tracks.append(new_frame_tracks)
     
     # Get the canonical track_ids for known persons
@@ -186,7 +185,6 @@ def process_pipeline():
     from database.ts_db import TimeSeriesDB
     from report.blip_caption import BLIPCaptioner
     from report.vlm_caption import SmolVLMCaptioner
-    from report.gemini_video import GeminiVideoCaptioner
 
     from report.llm_report import QwenReporter
     from utils.visualizer import draw_frame
@@ -202,13 +200,13 @@ def process_pipeline():
         return
     logger.info(f"Found {len(video_files)} videos.")
 
-    # Global state
+    # Global state    
     events_by_clip = {}
+    objects_by_clip = {}
+    skeletons_by_clip = {}
     captions_by_clip = {}
     vlm_captions_dict = {}
-    gemini_captions_dict = {}
 
-    skeletons_by_clip = {}
     all_baseline_skeletons = {}
 
     # Global Appearance ReID to handle back-to-camera tracking
@@ -235,6 +233,7 @@ def process_pipeline():
         tracker.load()
         tracks, objects = tracker.track(frames)
         tracker.unload()
+        del tracker
         enforce_vram_clear()
 
         # Log detection summary
@@ -255,38 +254,62 @@ def process_pipeline():
             face = FaceIdentityMatcher()
             face.load()
             identities = face.match_identities(frames, tracks)
+            face.unload() if hasattr(face, 'unload') else None
+        del face
+        enforce_vram_clear()
         
         # Cross-clip Appearance ReID (fixes back-to-camera without assumptions)
         # 1. Update gallery ONLY using confidently Face-Matched tracks to prevent poisoning
+        face_matched_names = set()
         for tid, name in identities.items():
             if name != "Unknown":
+                face_matched_names.add(name)
                 for f_idx in range(0, len(frames), 5):
                     frame_tracks = tracks[f_idx] if f_idx < len(tracks) else []
                     t_obj = next((t for t in frame_tracks if t["track_id"] == tid), None)
                     if t_obj:
-                        hist = reid_app.extract_histogram(frames[f_idx], t_obj["bbox"])
-                        reid_app.update_gallery(name, hist)
+                        w_box = t_obj["bbox"][2] - t_obj["bbox"][0]
+                        h_box = t_obj["bbox"][3] - t_obj["bbox"][1]
+                        # ML Anti-Poisoning Constraint: Only extract features from reasonable bounding boxes
+                        if w_box > 0 and 0.5 < (h_box / w_box) < 4.0:
+                            hist = reid_app.extract_histogram(frames[f_idx], t_obj["bbox"])
+                            reid_app.update_gallery(name, hist)
 
-        # 2. Identify unknown tracks using the clean gallery via majority voting
-        for tid in all_tids:
-            if identities.get(tid, "Unknown") == "Unknown":
-                reid_votes = []
-                for f_idx in range(0, len(frames), 5):
-                    frame_tracks = tracks[f_idx] if f_idx < len(tracks) else []
-                    t_obj = next((t for t in frame_tracks if t["track_id"] == tid), None)
-                    if t_obj:
-                        hist = reid_app.extract_histogram(frames[f_idx], t_obj["bbox"])
-                        matched_name = reid_app.identify(hist)
-                        if matched_name != "Unknown":
-                            reid_votes.append(matched_name)
-                
-                if reid_votes:
-                    from collections import Counter
-                    most_common = Counter(reid_votes).most_common(1)[0]
-                    # Only assign if the majority vote is strong enough (e.g., at least 2 votes or 100% of 1)
-                    if most_common[1] >= len(reid_votes) * 0.5:
-                        identities[tid] = most_common[0]
-                        logger.info(f"ReID Match: Track {tid} -> {most_common[0]} based on majority clothing votes")
+        # 2. Identify unknown tracks using the clean gallery via majority voting, EXCLUDING assigned names
+        available_names = set(cfg.target_names) - face_matched_names
+        if available_names:
+            for tid in all_tids:
+                if identities.get(tid, "Unknown") == "Unknown":
+                    reid_votes = []
+                    for f_idx in range(0, len(frames), 5):
+                        frame_tracks = tracks[f_idx] if f_idx < len(tracks) else []
+                        t_obj = next((t for t in frame_tracks if t["track_id"] == tid), None)
+                        if t_obj:
+                            hist = reid_app.extract_histogram(frames[f_idx], t_obj["bbox"])
+                            
+                            best_name = "Unknown"
+                            best_sim = 0.60
+                            for name in available_names:
+                                if name in reid_app.gallery:
+                                    import cv2
+                                    hists = reid_app.gallery[name]
+                                    sims = [cv2.compareHist(hist, h, cv2.HISTCMP_CORREL) for h in hists]
+                                    if sims:
+                                        avg_sim = sum(sorted(sims, reverse=True)[:3]) / min(3, len(sims))
+                                        if avg_sim > best_sim:
+                                            best_sim = avg_sim
+                                            best_name = name
+                            if best_name != "Unknown":
+                                reid_votes.append(best_name)
+                    
+                    if reid_votes:
+                        from collections import Counter
+                        most_common = Counter(reid_votes).most_common(1)[0]
+                        # Only assign if the majority vote is strong enough
+                        if most_common[1] >= len(reid_votes) * 0.5:
+                            identities[tid] = most_common[0]
+                            logger.info(f"ReID Match: Track {tid} -> {most_common[0]} based on majority clothing votes")
+                            available_names.discard(most_common[0])
 
         logger.info(f"Identities before merge: {identities}")
 
@@ -295,7 +318,21 @@ def process_pipeline():
             pose = RTMPoseEstimator()
             pose.load()
             skeletons = pose.estimate(frames, tracks)
+            pose.unload() if hasattr(pose, 'unload') else None
+        del pose
+        enforce_vram_clear()
         logger.info(f"Skeletons extracted for tracks: {list(skeletons.keys())}")
+        
+        # Filter identities by MIN_PRESENCE_RATIO to remove phantom tracks (false positives)
+        MIN_PRESENCE_RATIO = 0.05
+        for tid in list(identities.keys()):
+            # A track must have bounding boxes in at least 5% of frames
+            # to be considered a valid person, else downgrade to Unknown
+            bbox_count = sum(1 for frame_t in tracks if any(t['track_id'] == tid for t in frame_t))
+            if bbox_count < len(frames) * MIN_PRESENCE_RATIO:
+                if identities.get(tid, "Unknown") != "Unknown":
+                    logger.info(f"Downgrading track {tid} ({identities[tid]}) to Unknown due to low presence ({bbox_count}/{len(frames)} frames)")
+                    identities[tid] = "Unknown"
 
         # ===== v2.1 CRITICAL FIX: TRACK MERGING =====
         # Merge fragmented track_ids for the same person
@@ -345,12 +382,15 @@ def process_pipeline():
                     "end_frame": act["end_frame"]
                 })
 
-        # 6. HOI Prediction (Continuous CLIP Zero-Shot)
+        # 6. HOI Prediction (Dynamic CLIP Zero-Shot using YOLO objects)
         with ModelGuard("HOI CLIP"):
             clip_model = CLIPHOIPredictor()
             clip_model.load()
-            # Pass all frames and tracks, it samples every 30 frames internally
-            hoi_events_clip = clip_model.predict(frames, tracks, sample_rate=30)
+            # Pass YOLO objects to dynamically build CLIP prompts
+            hoi_events_clip = clip_model.predict(frames, tracks, objects_per_frame=objects, sample_rate=30)
+            clip_model.unload() if hasattr(clip_model, 'unload') else None
+        del clip_model
+        enforce_vram_clear()
 
         for h in hoi_events_clip:
             name = identities.get(h["track_id"], "Unknown")
@@ -360,29 +400,12 @@ def process_pipeline():
             h["person"] = name
             clip_events.append(h)
 
-        # ===== BLIP CAPTION & GROUNDING =====
+        # ===== BLIP CAPTION (Keyframe captioning only, verification moved to VLM) =====
         with ModelGuard("BLIP"):
             blip = BLIPCaptioner()
             blip.load()
             
-            # 1. Grounding (Cross-Validation of CLIP HOI)
-            hoi_candidates = [h for h in clip_events if h.get("type") in ("HOI", "HOI-CLIP")]
-            verified_hoi = []
-            for h in hoi_candidates:
-                f_idx = h.get("frame_idx", len(frames)//2)
-                f_idx = min(f_idx, len(frames)-1)
-                frame = frames[f_idx]
-                action_str = h.get("action", "")
-                result = blip.verify_action(frame, action_str)
-                h["blip_verified"] = result["verified"]
-                h["blip_confidence"] = result["confidence"]
-                verified_hoi.append(h)
-                logger.info(f"BLIP verified {action_str}: {result['verified']} (conf: {result['confidence']})")
-            
-            non_hoi_events = [h for h in clip_events if h.get("type") not in ("HOI", "HOI-CLIP")]
-            clip_events = non_hoi_events + verified_hoi
-            
-            # 2. Keyframe Captioning
+            # Keyframe Captioning only (BLIP is too weak for verification)
             captions = []
             for i in range(0, len(frames), 30):
                 cap_text = blip.generate_caption(frames[i], "This is a photo of ")
@@ -390,27 +413,79 @@ def process_pipeline():
                     "frame_idx": i,
                     "caption": cap_text
                 })
-                
-            for c in captions:
-                c["video"] = vid_name
-            captions_by_clip[vid_name] = captions
-        # ===== VLM CAPTION & GROUNDING =====
+            
+            blip.unload() if hasattr(blip, 'unload') else None
+        
+        del blip
+        enforce_vram_clear()
+        
+        for c in captions:
+            c["video"] = vid_name
+        captions_by_clip[vid_name] = captions
+
+        # ===== VLM CAPTION & CROSS-VALIDATION =====
         with ModelGuard("VLM"):
             vlm = SmolVLMCaptioner()
             vlm.load()
+            
+            # 1. VLM Fallback for Unknown AND low-confidence skeleton actions
+            LOW_CONF_THRESHOLD = 0.6
+            for tid, act_list in actions.items():
+                name = identities.get(tid, f"ID:{tid}")
+                if name == "Unknown": continue
+                for act in act_list:
+                    needs_vlm = (
+                        act["action"] == "Unknown" or 
+                        act.get("partial_skeleton", False) or
+                        (act["confidence"] < LOW_CONF_THRESHOLD and act["confidence"] > 0 and act["action"] not in ["Walking", "Sit down", "Standing"]) or
+                        act["action"] in ["Lying Down", "Fall Down", "Stand up"]
+                    )
+                    if needs_vlm:
+                        original_act = act["action"]
+                        resolved_act = vlm.resolve_unknown_action(frames, act["start_frame"], act["end_frame"], name)
+                        if resolved_act != "Unknown":
+                            logger.info(f"VLM override: {name} {original_act}(conf={act['confidence']:.2f}) -> {resolved_act}")
+                            act["action"] = resolved_act
+                            act["confidence"] = 0.80
+                            
+                            # Also update the clip_events that was already populated
+                            for ev in clip_events:
+                                if ev.get("track_id") == tid and ev.get("type") == "Action" and ev.get("start_frame") == act["start_frame"]:
+                                    ev["action"] = resolved_act
+                                    ev["confidence"] = 0.80
+            
+            # 2. VLM verification of HOI events (replaces BLIP which was too weak)
+            hoi_candidates = [h for h in clip_events if h.get("type") in ("HOI", "HOI-CLIP")]
+            for h in hoi_candidates:
+                f_idx = h.get("frame_idx", len(frames)//2)
+                f_idx = min(f_idx, len(frames)-1)
+                action_str = h.get("action", "")
+                obj_str = h.get("object", "")
+                
+                image = __import__('PIL').Image.fromarray(frames[f_idx][:, :, ::-1])
+                prompt = f"Is the person in this image {action_str.lower().replace('_', ' ')} a {obj_str.lower()}? Answer Yes or No."
+                
+                messages = [{"role": "user", "content": [{"type": "image"}, {"type": "text", "text": prompt}]}]
+                text = vlm.processor.apply_chat_template(messages, add_generation_prompt=True)
+                inputs = vlm.processor(text=text, images=[image], return_tensors="pt")
+                inputs = inputs.to(vlm.device)
+                
+                with torch.no_grad():
+                    gen = vlm.model.generate(**inputs, max_new_tokens=10)
+                decoded = vlm.processor.batch_decode(gen, skip_special_tokens=True)
+                response = decoded[0].split("Assistant:")[-1].strip().lower()
+                
+                h["vlm_verified"] = "yes" in response
+                h["vlm_answer"] = response
+                logger.info(f"VLM verified HOI {action_str}/{obj_str}: {h['vlm_verified']} ({response})")
+            
+            # 3. VLM Keyframe Captioning
             vlm_captions = vlm.caption_keyframes(frames, objects, identities, interval=30)
             vlm_captions_dict[vid_name] = vlm_captions
-        # ===== GEMINI CLOUD API =====
-        logger.info(f"Calling Gemini API for {vid_name}...")
-        gemini = GeminiVideoCaptioner(cfg.gemini_api_key)
-        gemini.load()
-        gemini_res = gemini.generate_video_caption(video_path)
-        gemini_captions_dict[vid_name] = gemini_res
-        logger.info(f"Gemini output: {gemini_res}")
-
-
-
-
+            vlm.unload() if hasattr(vlm, 'unload') else None
+        
+        del vlm
+        enforce_vram_clear()
         events_by_clip[vid_name] = clip_events
         # Save to Time-Series DB
         ts_db.insert_events({vid_name: clip_events})
@@ -460,6 +535,7 @@ def process_pipeline():
         save_debug_json(vid_name, "skeletons.json", skeletons)
         save_debug_json(vid_name, "actions.json", actions)
         save_debug_json(vid_name, "clip_hoi.json", clip_events)
+        objects_by_clip[vid_name] = objects
     # ===== KNOWLEDGE GRAPH GENERATION =====
     logger.info("\n--- Phase: Knowledge Graph Generation ---")
     kg_text = ""
@@ -486,11 +562,10 @@ def process_pipeline():
             events_by_clip=events_by_clip,
             captions_by_clip=captions_by_clip,
             vlm_captions_by_clip=vlm_captions_dict,
-            gemini_by_clip=gemini_captions_dict,
-            kg_text=kg_text
+            kg_text=kg_text,
+            objects_by_clip=objects_by_clip
         )
-
-
+    
     # Save outputs
     sys_dir = cfg.output_dir / "system_docs"
     sys_dir.mkdir(parents=True, exist_ok=True)

@@ -116,23 +116,25 @@ class FaceIdentityMatcher:
                 for t in tracks:
                     tx1, ty1, tx2, ty2 = t["bbox"]
                     if tx1 <= fcx <= tx2 and ty1 <= fcy <= ty2:
-                        # Compute IoU for better matching
-                        ix1 = max(fx1, tx1); iy1 = max(fy1, ty1)
-                        ix2 = min(fx2, tx2); iy2 = min(fy2, ty2)
-                        inter = max(0, ix2-ix1) * max(0, iy2-iy1)
-                        fa = (fx2-fx1)*(fy2-fy1)
-                        ta = (tx2-tx1)*(ty2-ty1)
-                        iou = inter / (fa + ta - inter + 1e-8)
-                        if iou > best_iou:
-                            best_iou = iou
+                        # Instead of IoU which penalizes larger person boxes,
+                        # we use the distance from the face center to the TOP-CENTER of the person box.
+                        # The face should be near the top-center of the person.
+                        pxc = (tx1 + tx2) / 2
+                        pyc = ty1 + (ty2 - ty1) * 0.15  # Estimate face is roughly at 15% from top
+                        
+                        dist = ((fcx - pxc) ** 2 + (fcy - pyc) ** 2) ** 0.5
+                        
+                        # We want the minimum distance
+                        if best_tid == -1 or dist < best_iou:  # using best_iou to store min dist
+                            best_iou = dist
                             best_tid = t["track_id"]
 
                 if best_tid == -1:
                     continue
 
                 emb = face.normed_embedding
+                best_sim = 0.40
                 best_name = "Unknown"
-                best_sim = 0.3  # Threshold
 
                 for name, target_emb in self.target_embeddings.items():
                     sim = float(np.dot(emb, target_emb))

@@ -47,7 +47,7 @@ class MotionBERTActionModel:
         self.model = None
         
         # We need the weights file
-        self.ckpt_path = cfg.project_root / "weights" / "motionbert_ntu60_xsub.bin"
+        self.ckpt_path = cfg.project_root.parent / "shared_weights" / "motionbert_ntu60_xsub.bin"
 
     def load(self):
         if self.model is not None:
@@ -90,93 +90,107 @@ class MotionBERTActionModel:
     def unload(self):
         self.model = None
 
-    def predict(self, skeletons: List[Dict]) -> str:
+    def predict(self, skeletons: List[Dict]) -> List[Dict]:
         """
-        Predict action from a sequence of skeletons for a SINGLE person.
-        skeletons: list of dicts over frames, e.g., [{"keypoints": np.array(17,3)}]
+        Predict action from a sequence of skeletons for a SINGLE person using a sliding window.
         """
         if self.model is None or not skeletons:
-            return "Unknown"
+            return [{"action": "Unknown", "confidence": 0.0, "start_frame": 0, "end_frame": 0}]
 
-        # 1. Extract and pad sequence to 243 frames (MotionBERT maxlen)
+        total_frames = len(skeletons)
+        if total_frames == 0:
+            return [{"action": "Unknown", "confidence": 0.0, "start_frame": 0, "end_frame": 0}]
+            
         T_target = 243
-        seq_len = len(skeletons)
+        window_size = 60
+        stride = 30
         
-        # Input shape expected by DSTformer: (B, T, V, C) or it processes (B, T, V, C) internally
-        # Actually DSTformer for action recognition usually takes (N, 3, T, V, M) in the wrapper
-        # But DSTformer itself takes (B, T, V, C) if we bypass the graph wrappers.
-        # Let's prepare a (1, 243, 17, 3) tensor
-        frames_kpts = []
-        for sk in skeletons:
-            if isinstance(sk, dict):
-                kpts = sk.get("keypoints")
-            else:
-                kpts = sk # It might be a numpy array directly
-                
-            if kpts is not None and kpts.shape == (17, 3):
-                # We must ZERO-CENTER the skeleton to fix the "Falling" bug!
-                # Keypoint 0 (Nose) or Center of gravity (Hip)
-                # Let's use the average of hips (idx 11, 12 in COCO) as root
-                root = (kpts[11, :2] + kpts[12, :2]) / 2.0
-                
-                # Copy so we don't modify the original
-                norm_kpts = kpts.copy()
-                norm_kpts[:, :2] = norm_kpts[:, :2] - root
-                
-                # Scale by standard resolution to mimic NTU preprocessing
-                # Assuming video is around 1920x1080
-                norm_kpts[:, 0] = norm_kpts[:, 0] / 1920.0
-                norm_kpts[:, 1] = norm_kpts[:, 1] / 1080.0
-                
-                frames_kpts.append(norm_kpts)
-                
-        if not frames_kpts:
-            return "Unknown"
-            
-        # Pad or truncate to T_target
-        if len(frames_kpts) < T_target:
-            # Pad by repeating the last frame
-            pad_len = T_target - len(frames_kpts)
-            frames_kpts.extend([frames_kpts[-1]] * pad_len)
-        elif len(frames_kpts) > T_target:
-            # Uniform sampling
-            indices = np.linspace(0, len(frames_kpts) - 1, T_target, dtype=int)
-            frames_kpts = [frames_kpts[i] for i in indices]
-            
-        # (243, 17, 3)
-        input_data = np.stack(frames_kpts)
-        # DSTformer expects (B, T, V, C) -> (1, 243, 17, 3)
-        input_tensor = torch.tensor(input_data, dtype=torch.float32).unsqueeze(0).to(self.device)
+        raw_predictions = []
+        prob_history = []
+        history_len = 3
         
-        with torch.no_grad():
-            # DSTformer forward returns: (B, F, J, num_classes)
-            logits = self.model(input_tensor)
-            # Pool over frames (F) and joints (J)
-            logits = logits.mean(dim=(1, 2))  # -> (B, num_classes)
+        for start_idx in range(0, total_frames, stride):
+            end_idx = min(start_idx + window_size, total_frames)
+            window_skeletons = skeletons[start_idx:end_idx]
             
-            probs = torch.softmax(logits, dim=1)
-            max_prob, pred_idx_tensor = torch.max(probs, dim=1)
-            max_prob = max_prob.item()
-            pred_idx = pred_idx_tensor.item()
+            frames_kpts = []
+            for sk in window_skeletons:
+                if isinstance(sk, dict):
+                    kpts = sk.get("keypoints")
+                else:
+                    kpts = sk
+                    
+                if kpts is not None and kpts.shape == (17, 3):
+                    root = (kpts[11, :2] + kpts[12, :2]) / 2.0
+                    norm_kpts = kpts.copy()
+                    norm_kpts[:, :2] = norm_kpts[:, :2] - root
+                    norm_kpts[:, 0] = norm_kpts[:, 0] / 1920.0
+                    norm_kpts[:, 1] = norm_kpts[:, 1] / 1080.0
+                    frames_kpts.append(norm_kpts)
+                    
+            if not frames_kpts:
+                raw_predictions.append({"action": "Unknown", "confidence": 0.0, "start_frame": start_idx, "end_frame": end_idx})
+                if end_idx == total_frames: break
+                continue
+                
+            # Pad to 243 for MotionBERT
+            if len(frames_kpts) < T_target:
+                pad_len = T_target - len(frames_kpts)
+                frames_kpts.extend([frames_kpts[-1]] * pad_len)
+            elif len(frames_kpts) > T_target:
+                indices = np.linspace(0, len(frames_kpts) - 1, T_target, dtype=int)
+                frames_kpts = [frames_kpts[i] for i in indices]
+                
+            input_data = np.stack(frames_kpts)
+            input_tensor = torch.tensor(input_data, dtype=torch.float32).unsqueeze(0).to(self.device)
             
-        if max_prob < 0.2:
-            return "Unknown"
+            with torch.no_grad():
+                logits = self.model(input_tensor)
+                # If the output is (B, num_classes), do not pool.
+                # If it's (B, T, V, C), we would pool, but usually it's (B, num_classes)
+                if len(logits.shape) > 2:
+                    # Fallback if it didn't pool internally
+                    logits = logits.view(logits.shape[0], -1, logits.shape[-1]).mean(dim=1)
+                    
+                probs = torch.softmax(logits, dim=1).cpu().numpy()[0]
+                
+            prob_history.append(probs)
+            if len(prob_history) > history_len:
+                prob_history.pop(0)
+                
+            avg_probs = np.mean(prob_history, axis=0)
+            pred_idx = int(np.argmax(avg_probs))
+            conf = float(avg_probs[pred_idx])
             
-        if 0 <= pred_idx < len(NTU60_CLASSES):
-            raw_action = NTU60_CLASSES[pred_idx]
-            if raw_action == "falling":
-                return "躺著"
-            elif raw_action in ["make a phone call", "playing with phone/tablet", "point finger at the other person"]:
-                return "說話"
-            elif raw_action == "sitting down":
-                return "坐著"
-            elif raw_action == "standing up":
-                return "站著"
-            elif raw_action in ["walking towards each other", "walking apart from each other", "staggering"]:
-                return "走路"
+            action_name = NTU60_CLASSES[pred_idx] if pred_idx < len(NTU60_CLASSES) else "Unknown"
+            mapped_action = action_name
+            if action_name in ["standing up", "cheer up"]: mapped_action = "Standing"
+            elif action_name in ["walking towards each other", "walking apart from each other", "staggering"]: mapped_action = "Walking"
+            elif action_name in ["sitting down"]: mapped_action = "Sitting"
+            elif action_name in ["falling"]: mapped_action = "Fall Down"
+            else: mapped_action = "Unknown"
+            
+            if conf < 0.2: mapped_action = "Unknown"
+            
+            raw_predictions.append({"action": mapped_action, "confidence": conf, "start_frame": start_idx, "end_frame": end_idx})
+            
+            if end_idx == total_frames:
+                break
+                
+        # Merge consecutive identical actions
+        merged = []
+        for pred in raw_predictions:
+            if not merged:
+                merged.append(pred)
             else:
-                return "Unknown"
-        return "Unknown"
+                last = merged[-1]
+                if last["action"] == pred["action"]:
+                    last["end_frame"] = pred["end_frame"]
+                    last["confidence"] = (last["confidence"] + pred["confidence"]) / 2.0
+                else:
+                    merged.append(pred)
+                    
+        return merged
 
 if __name__ == "__main__":
     with ModelGuard("MotionBERT_Action"):

@@ -44,14 +44,14 @@ class ByteTrackTracker:
         if self.model is None:
             raise RuntimeError("Model is not loaded. Call load() first.")
 
-        logger.info(f"Running tracking on {len(frames)} frames...")
-        results = self.model.track(frames, tracker="bytetrack.yaml", persist=True,
-                                   verbose=False, conf=0.2)
-
         all_tracks = []
         all_objects = []
 
-        for i, res in enumerate(results):
+        logger.info(f"Running tracking on {len(frames)} frames with ByteTrack (frame-by-frame)...")
+        for i, frame in enumerate(frames):
+            results = self.model.track(frame, tracker="bytetrack.yaml", persist=True, verbose=False, conf=0.35)
+            res = results[0]  # only 1 frame
+            
             frame_tracks = []
             frame_objects = []
 
@@ -64,6 +64,11 @@ class ByteTrackTracker:
                     name = res.names[cls_id]
 
                     if name == "person":
+                        # Filter out small background people (noise) to prevent track drift
+                        area = (x2 - x1) * (y2 - y1)
+                        if area < 8000:
+                            continue
+                            
                         tid = int(res.boxes.id[j].item()) if has_ids else j
                         frame_tracks.append({
                             "track_id": tid,
@@ -80,8 +85,9 @@ class ByteTrackTracker:
 
             all_tracks.append(frame_tracks)
             all_objects.append(frame_objects)
-            logger.debug(f"Frame {i}: {len(frame_tracks)} persons, {len(frame_objects)} objects. "
-                         f"IDs: {[t['track_id'] for t in frame_tracks]}")
+            
+            if i % 30 == 0:
+                logger.debug(f"Frame {i}: {len(frame_tracks)} persons, {len(frame_objects)} objects.")
 
         return all_tracks, all_objects
 

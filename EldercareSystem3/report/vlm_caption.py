@@ -142,6 +142,44 @@ class SmolVLMCaptioner:
 
         return verified_events
 
+    def resolve_unknown_action(self, frames: List[np.ndarray], start_frame: int, end_frame: int, person_name: str, bbox=None) -> str:
+        """Resolve 'Unknown' action using VLM on 4 frames of the sequence."""
+        if self.model is None or isinstance(self.model, str):
+            return "Unknown"
+            
+        import numpy as np
+        # Sample 4 frames evenly
+        f_idxs = np.linspace(start_frame, end_frame, 4, dtype=int)
+        f_idxs = [min(max(0, idx), len(frames) - 1) for idx in f_idxs]
+        images = [Image.fromarray(frames[idx][..., ::-1]) for idx in f_idxs]
+        
+        prompt = f"Look at these 4 frames spanning from frame {start_frame} to {end_frame}. What is the person '{person_name}' doing in this sequence? Choose EXACTLY ONE from this list: 'Standing', 'Sitting', 'Walking', 'Lying Down', 'Stand up', 'Sit down'. Reply with ONLY the chosen word, nothing else."
+        
+        content = [{"type": "image"} for _ in images]
+        content.append({"type": "text", "text": prompt})
+        
+        messages = [{"role": "user", "content": content}]
+        text = self.processor.apply_chat_template(messages, add_generation_prompt=True)
+        inputs = self.processor(text=text, images=images, return_tensors="pt")
+        inputs = inputs.to(self.device)
+        
+        with torch.no_grad():
+            gen = self.model.generate(**inputs, max_new_tokens=10)
+        decoded = self.processor.batch_decode(gen, skip_special_tokens=True)
+        response = decoded[0].split("Assistant:")[-1].strip()
+        
+        logger.info(f"VLM resolved Unknown for {person_name} ({start_frame}->{end_frame}) -> {response}")
+        
+        # Parse response
+        response_lower = response.lower()
+        if "sit down" in response_lower: return "Sit down"
+        if "stand up" in response_lower: return "Stand up"
+        if "sit" in response_lower: return "Sitting"
+        if "stand" in response_lower: return "Standing"
+        if "walk" in response_lower: return "Walking"
+        if "ly" in response_lower or "lay" in response_lower: return "Lying Down"
+        
+        return "Unknown"
 
 if __name__ == "__main__":
     dummy = [np.zeros((480, 640, 3), dtype=np.uint8) for _ in range(20)]
