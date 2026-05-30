@@ -366,7 +366,7 @@ def process_pipeline():
             frame_h, frame_w = frames[0].shape[:2]
             for tid in identities.keys():
                 skel_seq = skeletons.get(tid, [])
-                act_list = act_model.predict(skel_seq, w=frame_w, h=frame_h)
+                act_list = act_model.predict(skel_seq, frame_w=frame_w, frame_h=frame_h)
                 actions[tid] = act_list
 
         for tid, act_list in actions.items():
@@ -400,28 +400,9 @@ def process_pipeline():
             h["person"] = name
             clip_events.append(h)
 
-        # ===== BLIP CAPTION (Keyframe captioning only, verification moved to VLM) =====
-        with ModelGuard("BLIP"):
-            blip = BLIPCaptioner()
-            blip.load()
-            
-            # Keyframe Captioning only (BLIP is too weak for verification)
-            captions = []
-            for i in range(0, len(frames), 30):
-                cap_text = blip.generate_caption(frames[i], "This is a photo of ")
-                captions.append({
-                    "frame_idx": i,
-                    "caption": cap_text
-                })
-            
-            blip.unload() if hasattr(blip, 'unload') else None
-        
-        del blip
-        enforce_vram_clear()
-        
-        for c in captions:
-            c["video"] = vid_name
-        captions_by_clip[vid_name] = captions
+        # ===== BLIP CAPTION REMOVED (Redundant with VLM) =====
+        captions_by_clip[vid_name] = []
+
 
         # ===== VLM CAPTION & CROSS-VALIDATION =====
         with ModelGuard("VLM"):

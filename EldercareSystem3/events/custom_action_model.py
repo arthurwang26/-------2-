@@ -3,43 +3,45 @@ import torch.nn as nn
 import math
 
 class TransformerLSTMActionModel(nn.Module):
-    def __init__(self, input_dim=51, hidden_dim=128, num_classes=7, num_heads=4, num_layers=2, dropout=0.3):
+    def __init__(self, input_dim=102, hidden_dim=256, num_classes=7, num_heads=4, num_layers=2, dropout=0.5):
         super(TransformerLSTMActionModel, self).__init__()
         
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         
-        # 1. Feature Projection
+        # 1. Feature Projection (Linear layer to expand coordinates)
         self.feature_proj = nn.Linear(input_dim, hidden_dim)
         
         # 2. Positional Encoding for Transformer
         self.pos_encoder = PositionalEncoding(hidden_dim, dropout)
         
-        # 3. Transformer Encoder
+        # 3. Transformer Encoder (Global attention across the motion sequences)
         encoder_layers = nn.TransformerEncoderLayer(
             d_model=hidden_dim, 
             nhead=num_heads, 
-            dim_feedforward=hidden_dim*2, 
+            dim_feedforward=hidden_dim * 2, 
             dropout=dropout, 
             batch_first=True
         )
         self.transformer_encoder = nn.TransformerEncoder(encoder_layers, num_layers=num_layers)
-        
-        # 4. LSTM Layer (Bidirectional for better context)
+
+        # 4. LSTM Layer (Bidirectional for temporal dynamics)
+        # We put LSTM *after* Transformer to refine local temporal structures from global attention
         self.lstm = nn.LSTM(
             input_size=hidden_dim,
-            hidden_size=hidden_dim,
-            num_layers=1,
+            hidden_size=hidden_dim // 2, # Halve it because bidirectional will concat to hidden_dim
+            num_layers=2, # Use 2 layers as requested
             batch_first=True,
-            bidirectional=True
+            bidirectional=True,
+            dropout=dropout
         )
         
         # 5. Classifier Head
         self.classifier = nn.Sequential(
-            nn.Linear(hidden_dim * 2, hidden_dim),
+            nn.Linear(hidden_dim, hidden_dim // 2),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(hidden_dim, num_classes)
+            nn.Linear(hidden_dim // 2, num_classes)
         )
 
     def forward(self, x):
@@ -51,18 +53,17 @@ class TransformerLSTMActionModel(nn.Module):
         # 2. Positional Encoding
         x = self.pos_encoder(x)
         
-        # 3. Transformer (Global attention across frames)
+        # 3. Transformer (Global attention across motion frames)
         x = self.transformer_encoder(x)
+
+        # 4. LSTM (Refine local dynamics)
+        x, _ = self.lstm(x)
         
-        # 4. LSTM (Strict temporal sequencing)
-        # We take the final hidden state of the LSTM
-        out, (hn, cn) = self.lstm(x)
-        # hn shape for bidirectional: (2, batch_size, hidden_dim)
-        # We concatenate the final forward and backward states
-        final_state = torch.cat((hn[-2,:,:], hn[-1,:,:]), dim=1) 
+        # 5. Pooling (Global Average Pooling over the sequence)
+        pooled_features = torch.mean(x, dim=1) 
         
-        # 5. Classification
-        logits = self.classifier(final_state)
+        # 6. Classification
+        logits = self.classifier(pooled_features)
         return logits
 
 class PositionalEncoding(nn.Module):

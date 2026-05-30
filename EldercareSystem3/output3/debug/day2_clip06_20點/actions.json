@@ -1,0 +1,32 @@
+{
+  "1": [
+    {
+      "action": "Walking",
+      "confidence": 0.5322244353043659,
+      "start_frame": 0,
+      "end_frame": 176
+    },
+    {
+      "action": "Standing",
+      "start_frame": 176,
+      "end_frame": 192,
+      "confidence": 0.6708716377615929
+    }
+  ],
+  "2": [
+    {
+      "action": "Walking",
+      "confidence": 0.5380387879571888,
+      "start_frame": 0,
+      "end_frame": 192
+    }
+  ],
+  "3": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ]
+}

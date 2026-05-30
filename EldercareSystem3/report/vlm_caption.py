@@ -4,6 +4,7 @@ from typing import List, Dict
 import numpy as np
 import torch
 from PIL import Image
+import cv2
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
@@ -67,7 +68,13 @@ class SmolVLMCaptioner:
                 continue
 
             image = Image.fromarray(frames[i][..., ::-1])
-            prompt = "Describe this scene briefly. Focus on people, their social interactions (e.g. talking, arguing, ignoring each other, greeting), their specific actions (e.g. walking, sitting, reading), objects, and their emotional state."
+            detected_obj_names = set()
+            if objects_per_frame and i < len(objects_per_frame):
+                detected_obj_names = set([o["class_name"] for o in objects_per_frame[i] if o["class_name"] != "person"])
+            
+            obj_context = f" The ONLY objects present in this room are: {', '.join(detected_obj_names)}. Do not hallucinate any other objects." if detected_obj_names else " Do not mention any specific objects as none were detected."
+            
+            prompt = f"Describe this scene briefly. Focus on people, their social interactions (e.g. talking, arguing, ignoring each other, greeting), their specific actions (e.g. walking, sitting, reading), and their emotional state.{obj_context}"
 
             messages = [{"role": "user", "content": [
                 {"type": "image"}, {"type": "text", "text": prompt}]}]
@@ -98,8 +105,8 @@ class SmolVLMCaptioner:
                 parts.append(f"偵測到物件：{'、'.join(obj_names)}")
         return "。".join(parts) if parts else "室內場景"
 
-    def verify_hoi_events(self, frames: List[np.ndarray], hoi_events: List[Dict]) -> List[Dict]:
-        """Cross-validate HOI events proposed by CLIP.
+    def verify_hoi_events(self, frames: List[np.ndarray], hoi_events: List[Dict], tracks: List[List[Dict]] = None) -> List[Dict]:
+        """Cross-validate HOI events proposed by CLIP with visual grounding.
         Returns a filtered list of events where the VLM answered 'Yes'.
         """
         if self.model is None or isinstance(self.model, str):
@@ -121,8 +128,18 @@ class SmolVLMCaptioner:
                 verified_events.append(ev)
                 continue
 
-            image = Image.fromarray(frames[f_idx][..., ::-1])
-            prompt = f"Is the person in this image doing the following action: '{action_desc}'? Please answer exactly 'Yes' or 'No', followed by a brief 1-sentence reason."
+            frame_copy = frames[f_idx].copy()
+            if tracks and "track_id" in ev:
+                track_id = ev["track_id"]
+                for det in (tracks[f_idx] if f_idx < len(tracks) else []):
+                    if det.get("track_id") == track_id:
+                        box = det["bbox"]
+                        x1, y1, x2, y2 = map(int, box[:4])
+                        cv2.rectangle(frame_copy, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                        break
+
+            image = Image.fromarray(frame_copy[..., ::-1])
+            prompt = f"Is the person inside the RED bounding box doing the following action: '{action_desc}'? Please answer exactly 'Yes' or 'No', followed by a brief 1-sentence reason."
 
             messages = [{"role": "user", "content": [
                 {"type": "image"}, {"type": "text", "text": prompt}]}]
@@ -143,7 +160,7 @@ class SmolVLMCaptioner:
         return verified_events
 
     def resolve_unknown_action(self, frames: List[np.ndarray], start_frame: int, end_frame: int, person_name: str, bbox=None) -> str:
-        """Resolve 'Unknown' action using VLM on 4 frames of the sequence."""
+        """Resolve 'Unknown' action using VLM on 4 frames of the sequence with visual grounding."""
         if self.model is None or isinstance(self.model, str):
             return "Unknown"
             
@@ -151,9 +168,15 @@ class SmolVLMCaptioner:
         # Sample 4 frames evenly
         f_idxs = np.linspace(start_frame, end_frame, 4, dtype=int)
         f_idxs = [min(max(0, idx), len(frames) - 1) for idx in f_idxs]
-        images = [Image.fromarray(frames[idx][..., ::-1]) for idx in f_idxs]
+        images = []
+        for idx in f_idxs:
+            frame_copy = frames[idx].copy()
+            if bbox is not None:
+                x1, y1, x2, y2 = map(int, bbox[:4])
+                cv2.rectangle(frame_copy, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            images.append(Image.fromarray(frame_copy[..., ::-1]))
         
-        prompt = f"Look at these 4 frames spanning from frame {start_frame} to {end_frame}. What is the person '{person_name}' doing in this sequence? Choose EXACTLY ONE from this list: 'Standing', 'Sitting', 'Walking', 'Lying Down', 'Stand up', 'Sit down'. Reply with ONLY the chosen word, nothing else."
+        prompt = f"Look at these 4 frames spanning from frame {start_frame} to {end_frame}. What is the person inside the RED bounding box doing in this sequence? Choose EXACTLY ONE from this list: 'Standing', 'Sitting', 'Walking', 'Lying Down', 'Stand up', 'Sit down'. Reply with ONLY the chosen word, nothing else."
         
         content = [{"type": "image"} for _ in images]
         content.append({"type": "text", "text": prompt})

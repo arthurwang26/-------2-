@@ -1,0 +1,172 @@
+{
+  "2": [
+    {
+      "action": "Walking",
+      "confidence": 0.5766873837455933,
+      "start_frame": 0,
+      "end_frame": 145
+    },
+    {
+      "action": "Standing",
+      "start_frame": 145,
+      "end_frame": 155,
+      "confidence": 0.42908310890197754
+    },
+    {
+      "action": "Sitting",
+      "start_frame": 155,
+      "end_frame": 183,
+      "confidence": 0.8
+    },
+    {
+      "action": "Standing",
+      "start_frame": 183,
+      "end_frame": 191,
+      "confidence": 0.5425592660903931
+    }
+  ],
+  "7": [
+    {
+      "action": "Sitting",
+      "confidence": 0.9369599557275592,
+      "start_frame": 0,
+      "end_frame": 115
+    }
+  ],
+  "1": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "4": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "6": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "27": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "31": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "30": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "35": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "26": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "39": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "42": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "50": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "25": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "36": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "44": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "47": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "45": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "53": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ]
+}

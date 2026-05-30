@@ -1,0 +1,36 @@
+{
+  "1": [
+    {
+      "action": "Sitting",
+      "confidence": 0.9347180832703208,
+      "start_frame": 0,
+      "end_frame": 192
+    }
+  ],
+  "17": [
+    {
+      "action": "Walking",
+      "confidence": 0.6031987851546319,
+      "start_frame": 0,
+      "end_frame": 130
+    },
+    {
+      "action": "Sitting",
+      "start_frame": 130,
+      "end_frame": 165,
+      "confidence": 0.8
+    },
+    {
+      "action": "Standing",
+      "start_frame": 165,
+      "end_frame": 172,
+      "confidence": 0.4607376158237457
+    },
+    {
+      "action": "Sitting",
+      "start_frame": 172,
+      "end_frame": 180,
+      "confidence": 0.8
+    }
+  ]
+}

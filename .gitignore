@@ -41,13 +41,13 @@ node_modules/
 # =====================
 outputs/
 outputs2/
-output3/
+
 frame_cache/
 
 # =====================
 # Large Files & Datasets
 # =====================
 *.gguf
-*.mp4
+
 shared_data/
 archive/

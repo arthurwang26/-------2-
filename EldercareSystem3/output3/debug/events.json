@@ -1,0 +1,890 @@
+{
+  "day1_clip01_9點": [
+    {
+      "video": "day1_clip01_9點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.6143886093050241,
+      "start_frame": 0,
+      "end_frame": 60
+    },
+    {
+      "video": "day1_clip01_9點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.6135708000510931,
+      "start_frame": 60,
+      "end_frame": 95
+    },
+    {
+      "video": "day1_clip01_9點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.5790854272199795,
+      "start_frame": 95,
+      "end_frame": 145
+    },
+    {
+      "video": "day1_clip01_9點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.5209340900182724,
+      "start_frame": 145,
+      "end_frame": 160
+    },
+    {
+      "video": "day1_clip01_9點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.6661852505349088,
+      "start_frame": 160,
+      "end_frame": 192
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_On",
+      "object": "Couch",
+      "track_id": 2,
+      "frame_idx": 60,
+      "start_frame": 60,
+      "end_frame": 60,
+      "confidence": 0.433,
+      "video": "day1_clip01_9點",
+      "person": "王奶奶",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_On",
+      "object": "Chair",
+      "track_id": 2,
+      "frame_idx": 180,
+      "start_frame": 180,
+      "end_frame": 180,
+      "confidence": 0.437,
+      "video": "day1_clip01_9點",
+      "person": "王奶奶",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    }
+  ],
+  "day1_clip02_11點": [
+    {
+      "video": "day1_clip02_11點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.519941913895309,
+      "start_frame": 0,
+      "end_frame": 65
+    },
+    {
+      "video": "day1_clip02_11點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 65,
+      "end_frame": 95
+    },
+    {
+      "video": "day1_clip02_11點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.5449612401425838,
+      "start_frame": 95,
+      "end_frame": 125
+    },
+    {
+      "video": "day1_clip02_11點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.5350423172722003,
+      "start_frame": 125,
+      "end_frame": 185
+    },
+    {
+      "video": "day1_clip02_11點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.30471929907798767,
+      "start_frame": 185,
+      "end_frame": 190
+    },
+    {
+      "video": "day1_clip02_11點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.7292730437688564,
+      "start_frame": 0,
+      "end_frame": 192
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_On",
+      "object": "Chair",
+      "track_id": 1,
+      "frame_idx": 180,
+      "start_frame": 180,
+      "end_frame": 180,
+      "confidence": 0.542,
+      "video": "day1_clip02_11點",
+      "person": "陳爺爺",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    }
+  ],
+  "day1_clip03_13點": [
+    {
+      "video": "day1_clip03_13點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.7987600645498328,
+      "start_frame": 0,
+      "end_frame": 192
+    },
+    {
+      "video": "day1_clip03_13點",
+      "track_id": 4,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.849950397387147,
+      "start_frame": 0,
+      "end_frame": 53
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_At",
+      "object": "Table",
+      "track_id": 2,
+      "frame_idx": 0,
+      "start_frame": 0,
+      "end_frame": 0,
+      "confidence": 0.539,
+      "video": "day1_clip03_13點",
+      "person": "王奶奶",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_On",
+      "object": "Chair",
+      "track_id": 4,
+      "frame_idx": 0,
+      "start_frame": 0,
+      "end_frame": 0,
+      "confidence": 0.455,
+      "video": "day1_clip03_13點",
+      "person": "陳爺爺",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    }
+  ],
+  "day1_clip04_15點": [
+    {
+      "video": "day1_clip04_15點",
+      "track_id": 9,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.6391865207199539,
+      "start_frame": 0,
+      "end_frame": 160
+    },
+    {
+      "video": "day1_clip04_15點",
+      "track_id": 9,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.44412958435714245,
+      "start_frame": 160,
+      "end_frame": 180
+    },
+    {
+      "video": "day1_clip04_15點",
+      "track_id": 9,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.43497928977012634,
+      "start_frame": 180,
+      "end_frame": 186
+    },
+    {
+      "video": "day1_clip04_15點",
+      "track_id": 4,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.8656037508536066,
+      "start_frame": 0,
+      "end_frame": 184
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Watching",
+      "object": "TV",
+      "track_id": 4,
+      "frame_idx": 0,
+      "start_frame": 0,
+      "end_frame": 0,
+      "confidence": 0.859,
+      "video": "day1_clip04_15點",
+      "person": "王奶奶",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    }
+  ],
+  "day1_clip05_17點": [
+    {
+      "video": "day1_clip05_17點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.5766873837455933,
+      "start_frame": 0,
+      "end_frame": 145
+    },
+    {
+      "video": "day1_clip05_17點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.42908310890197754,
+      "start_frame": 145,
+      "end_frame": 155
+    },
+    {
+      "video": "day1_clip05_17點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 155,
+      "end_frame": 183
+    },
+    {
+      "video": "day1_clip05_17點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.5425592660903931,
+      "start_frame": 183,
+      "end_frame": 191
+    },
+    {
+      "video": "day1_clip05_17點",
+      "track_id": 7,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.9369599557275592,
+      "start_frame": 0,
+      "end_frame": 115
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_On",
+      "object": "Chair",
+      "track_id": 2,
+      "frame_idx": 150,
+      "start_frame": 150,
+      "end_frame": 150,
+      "confidence": 0.431,
+      "video": "day1_clip05_17點",
+      "person": "陳爺爺",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    }
+  ],
+  "day1_clip06_20點": [
+    {
+      "video": "day1_clip06_20點",
+      "track_id": 9,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 0,
+      "end_frame": 110
+    },
+    {
+      "video": "day1_clip06_20點",
+      "track_id": 9,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.6100791017524898,
+      "start_frame": 110,
+      "end_frame": 155
+    },
+    {
+      "video": "day1_clip06_20點",
+      "track_id": 9,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.9136378971015802,
+      "start_frame": 155,
+      "end_frame": 192
+    },
+    {
+      "video": "day1_clip06_20點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.7501563274880566,
+      "start_frame": 0,
+      "end_frame": 192
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Eating_At",
+      "object": "Table",
+      "track_id": 2,
+      "frame_idx": 0,
+      "start_frame": 0,
+      "end_frame": 0,
+      "confidence": 0.473,
+      "video": "day1_clip06_20點",
+      "person": "王奶奶",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_At",
+      "object": "Table",
+      "track_id": 2,
+      "frame_idx": 30,
+      "start_frame": 30,
+      "end_frame": 30,
+      "confidence": 0.705,
+      "video": "day1_clip06_20點",
+      "person": "王奶奶",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_At",
+      "object": "Table",
+      "track_id": 9,
+      "frame_idx": 30,
+      "start_frame": 30,
+      "end_frame": 30,
+      "confidence": 0.544,
+      "video": "day1_clip06_20點",
+      "person": "陳爺爺",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    }
+  ],
+  "day2_clip01_9點": [
+    {
+      "video": "day2_clip01_9點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.6471351446659601,
+      "start_frame": 0,
+      "end_frame": 166
+    },
+    {
+      "video": "day2_clip01_9點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.7799523945432156,
+      "start_frame": 166,
+      "end_frame": 192
+    },
+    {
+      "video": "day2_clip01_9點",
+      "track_id": 1,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.9303519737119705,
+      "start_frame": 0,
+      "end_frame": 192
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Reading",
+      "object": "Book",
+      "track_id": 1,
+      "frame_idx": 30,
+      "start_frame": 30,
+      "end_frame": 30,
+      "confidence": 0.466,
+      "video": "day2_clip01_9點",
+      "person": "王奶奶",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Holding",
+      "object": "Book",
+      "track_id": 1,
+      "frame_idx": 150,
+      "start_frame": 150,
+      "end_frame": 150,
+      "confidence": 0.458,
+      "video": "day2_clip01_9點",
+      "person": "王奶奶",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    }
+  ],
+  "day2_clip02_11點": [
+    {
+      "video": "day2_clip02_11點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.506381148879882,
+      "start_frame": 0,
+      "end_frame": 80
+    },
+    {
+      "video": "day2_clip02_11點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 80,
+      "end_frame": 176
+    },
+    {
+      "video": "day2_clip02_11點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.4552916865795851,
+      "start_frame": 176,
+      "end_frame": 192
+    },
+    {
+      "video": "day2_clip02_11點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.7444859848503285,
+      "start_frame": 0,
+      "end_frame": 192
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Drinking_From",
+      "object": "Cup",
+      "track_id": 2,
+      "frame_idx": 0,
+      "start_frame": 0,
+      "end_frame": 0,
+      "confidence": 0.485,
+      "video": "day2_clip02_11點",
+      "person": "王奶奶",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Holding",
+      "object": "Cup",
+      "track_id": 2,
+      "frame_idx": 30,
+      "start_frame": 30,
+      "end_frame": 30,
+      "confidence": 0.464,
+      "video": "day2_clip02_11點",
+      "person": "王奶奶",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Holding",
+      "object": "Cup",
+      "track_id": 1,
+      "frame_idx": 60,
+      "start_frame": 60,
+      "end_frame": 60,
+      "confidence": 0.486,
+      "video": "day2_clip02_11點",
+      "person": "陳爺爺",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_On",
+      "object": "Couch",
+      "track_id": 2,
+      "frame_idx": 60,
+      "start_frame": 60,
+      "end_frame": 60,
+      "confidence": 0.51,
+      "video": "day2_clip02_11點",
+      "person": "王奶奶",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Drinking_From",
+      "object": "Cup",
+      "track_id": 1,
+      "frame_idx": 120,
+      "start_frame": 120,
+      "end_frame": 120,
+      "confidence": 0.576,
+      "video": "day2_clip02_11點",
+      "person": "陳爺爺",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    }
+  ],
+  "day2_clip03_13點": [
+    {
+      "video": "day2_clip03_13點",
+      "track_id": 3,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.74140663768077,
+      "start_frame": 0,
+      "end_frame": 192
+    },
+    {
+      "video": "day2_clip03_13點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 0,
+      "end_frame": 155
+    },
+    {
+      "video": "day2_clip03_13點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.6600308890047017,
+      "start_frame": 155,
+      "end_frame": 192
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_At",
+      "object": "Table",
+      "track_id": 3,
+      "frame_idx": 30,
+      "start_frame": 30,
+      "end_frame": 30,
+      "confidence": 0.575,
+      "video": "day2_clip03_13點",
+      "person": "陳爺爺",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_At",
+      "object": "Table",
+      "track_id": 2,
+      "frame_idx": 90,
+      "start_frame": 90,
+      "end_frame": 90,
+      "confidence": 0.488,
+      "video": "day2_clip03_13點",
+      "person": "王奶奶",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    }
+  ],
+  "day2_clip04_15點": [
+    {
+      "video": "day2_clip04_15點",
+      "track_id": 1,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 0,
+      "end_frame": 95
+    },
+    {
+      "video": "day2_clip04_15點",
+      "track_id": 1,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.7676249430268136,
+      "start_frame": 95,
+      "end_frame": 192
+    },
+    {
+      "video": "day2_clip04_15點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 0,
+      "end_frame": 40
+    },
+    {
+      "video": "day2_clip04_15點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.32784824073314667,
+      "start_frame": 40,
+      "end_frame": 50
+    },
+    {
+      "video": "day2_clip04_15點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.363572463975288,
+      "start_frame": 50,
+      "end_frame": 79
+    },
+    {
+      "video": "day2_clip04_15點",
+      "track_id": 2,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.34131669998168945,
+      "start_frame": 79,
+      "end_frame": 88
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_On",
+      "object": "Chair",
+      "track_id": 1,
+      "frame_idx": 0,
+      "start_frame": 0,
+      "end_frame": 0,
+      "confidence": 0.597,
+      "video": "day2_clip04_15點",
+      "person": "王奶奶",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    }
+  ],
+  "day2_clip05_17點": [
+    {
+      "video": "day2_clip05_17點",
+      "track_id": 1,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.9347180832703208,
+      "start_frame": 0,
+      "end_frame": 192
+    },
+    {
+      "video": "day2_clip05_17點",
+      "track_id": 17,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.6031987851546319,
+      "start_frame": 0,
+      "end_frame": 130
+    },
+    {
+      "video": "day2_clip05_17點",
+      "track_id": 17,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 130,
+      "end_frame": 165
+    },
+    {
+      "video": "day2_clip05_17點",
+      "track_id": 17,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.4607376158237457,
+      "start_frame": 165,
+      "end_frame": 172
+    },
+    {
+      "video": "day2_clip05_17點",
+      "track_id": 17,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 172,
+      "end_frame": 180
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_On",
+      "object": "Couch",
+      "track_id": 1,
+      "frame_idx": 0,
+      "start_frame": 0,
+      "end_frame": 0,
+      "confidence": 0.478,
+      "video": "day2_clip05_17點",
+      "person": "王奶奶",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Holding",
+      "object": "Cup",
+      "track_id": 17,
+      "frame_idx": 30,
+      "start_frame": 30,
+      "end_frame": 30,
+      "confidence": 0.741,
+      "video": "day2_clip05_17點",
+      "person": "陳爺爺",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_On",
+      "object": "Chair",
+      "track_id": 1,
+      "frame_idx": 150,
+      "start_frame": 150,
+      "end_frame": 150,
+      "confidence": 0.473,
+      "video": "day2_clip05_17點",
+      "person": "王奶奶",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Sitting_On",
+      "object": "Chair",
+      "track_id": 17,
+      "frame_idx": 191,
+      "start_frame": 191,
+      "end_frame": 191,
+      "confidence": 0.661,
+      "video": "day2_clip05_17點",
+      "person": "陳爺爺",
+      "vlm_verified": true,
+      "vlm_answer": "yes."
+    }
+  ],
+  "day2_clip06_20點": [
+    {
+      "video": "day2_clip06_20點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.5322244353043659,
+      "start_frame": 0,
+      "end_frame": 176
+    },
+    {
+      "video": "day2_clip06_20點",
+      "track_id": 1,
+      "person": "陳爺爺",
+      "type": "Action",
+      "action": "Standing",
+      "confidence": 0.6708716377615929,
+      "start_frame": 176,
+      "end_frame": 192
+    },
+    {
+      "video": "day2_clip06_20點",
+      "track_id": 2,
+      "person": "王奶奶",
+      "type": "Action",
+      "action": "Walking",
+      "confidence": 0.5380387879571888,
+      "start_frame": 0,
+      "end_frame": 192
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Looking_At",
+      "object": "Vase",
+      "track_id": 1,
+      "frame_idx": 0,
+      "start_frame": 0,
+      "end_frame": 0,
+      "confidence": 0.785,
+      "video": "day2_clip06_20點",
+      "person": "陳爺爺",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    },
+    {
+      "type": "HOI-CLIP",
+      "action": "Looking_At",
+      "object": "Vase",
+      "track_id": 2,
+      "frame_idx": 0,
+      "start_frame": 0,
+      "end_frame": 0,
+      "confidence": 0.805,
+      "video": "day2_clip06_20點",
+      "person": "王奶奶",
+      "vlm_verified": false,
+      "vlm_answer": "no."
+    }
+  ]
+}

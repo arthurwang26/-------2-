@@ -1,0 +1,80 @@
+[
+  {
+    "video": "day1_clip01_9點",
+    "track_id": 2,
+    "person": "王奶奶",
+    "type": "Action",
+    "action": "Walking",
+    "confidence": 0.6143886093050241,
+    "start_frame": 0,
+    "end_frame": 60
+  },
+  {
+    "video": "day1_clip01_9點",
+    "track_id": 2,
+    "person": "王奶奶",
+    "type": "Action",
+    "action": "Sitting",
+    "confidence": 0.6135708000510931,
+    "start_frame": 60,
+    "end_frame": 95
+  },
+  {
+    "video": "day1_clip01_9點",
+    "track_id": 2,
+    "person": "王奶奶",
+    "type": "Action",
+    "action": "Walking",
+    "confidence": 0.5790854272199795,
+    "start_frame": 95,
+    "end_frame": 145
+  },
+  {
+    "video": "day1_clip01_9點",
+    "track_id": 2,
+    "person": "王奶奶",
+    "type": "Action",
+    "action": "Standing",
+    "confidence": 0.5209340900182724,
+    "start_frame": 145,
+    "end_frame": 160
+  },
+  {
+    "video": "day1_clip01_9點",
+    "track_id": 2,
+    "person": "王奶奶",
+    "type": "Action",
+    "action": "Sitting",
+    "confidence": 0.6661852505349088,
+    "start_frame": 160,
+    "end_frame": 192
+  },
+  {
+    "type": "HOI-CLIP",
+    "action": "Sitting_On",
+    "object": "Couch",
+    "track_id": 2,
+    "frame_idx": 60,
+    "start_frame": 60,
+    "end_frame": 60,
+    "confidence": 0.433,
+    "video": "day1_clip01_9點",
+    "person": "王奶奶",
+    "vlm_verified": false,
+    "vlm_answer": "no."
+  },
+  {
+    "type": "HOI-CLIP",
+    "action": "Sitting_On",
+    "object": "Chair",
+    "track_id": 2,
+    "frame_idx": 180,
+    "start_frame": 180,
+    "end_frame": 180,
+    "confidence": 0.437,
+    "video": "day1_clip01_9點",
+    "person": "王奶奶",
+    "vlm_verified": true,
+    "vlm_answer": "yes."
+  }
+]

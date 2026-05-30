@@ -1,0 +1,90 @@
+{
+  "1": [
+    {
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 0,
+      "end_frame": 95
+    },
+    {
+      "action": "Standing",
+      "start_frame": 95,
+      "end_frame": 192,
+      "confidence": 0.7676249430268136
+    }
+  ],
+  "2": [
+    {
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 0,
+      "end_frame": 40
+    },
+    {
+      "action": "Standing",
+      "start_frame": 40,
+      "end_frame": 50,
+      "confidence": 0.32784824073314667
+    },
+    {
+      "action": "Walking",
+      "start_frame": 50,
+      "end_frame": 79,
+      "confidence": 0.363572463975288
+    },
+    {
+      "action": "Standing",
+      "start_frame": 79,
+      "end_frame": 88,
+      "confidence": 0.34131669998168945
+    }
+  ],
+  "7": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "4": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "13": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "15": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "5": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "9": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ]
+}

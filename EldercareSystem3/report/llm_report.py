@@ -36,7 +36,7 @@ class QwenReporter:
             from llama_cpp import Llama
             self.llm = Llama(
                 model_path=str(model_path),
-                n_ctx=8192,
+                n_ctx=16384,
                 n_gpu_layers=-1,
                 verbose=False
             )
@@ -193,29 +193,16 @@ class QwenReporter:
         
         for clip in clip_names:
             clip_context = self._format_all_clips_context({clip: events_by_clip[clip]}, objects_by_clip)
-            blip_context = format_captions(clip, captions_by_clip, "BLIP")
             vlm_context = format_captions(clip, vlm_captions_by_clip, "VLM")
             
-            # --- 1. Generate Main Report (No GT) ---
+            # --- 1. Generate Per-Clip Detailed Report ---
             prompt = f"""<|im_start|>system
-你是長照中心院長。你需要根據提供的資料，輸出兩份不同用途的報表。絕對不要使用任何外部正確解答(Ground Truth)來推理。
+你是一位專業的長照中心護理長。請根據以下紀錄，為這個影片片段寫出一段**詳細的分析內容**。
 
-【核心規則與限制】
-1. **結構嚴格劃分**：你必須嚴格按照以下兩個區塊輸出。
-2. **家屬報告區塊**：用語要像長照中心院長讓家屬知道老人在幹嘛的感覺，語氣要自然像真人回答，不能太生硬。絕對遵守以下限制：
-   - 只能敘述真實確認發生的物理事實，絕對不能使用「可能」、「或許」、「似乎」等猜測性字眼。
-   - 絕對禁止使用任何帶有情緒、心理狀態或人際關係推測的詞彙（如：冷戰、疏離、情緒低落、試探、和好等）。
-   - 絕對不要透露技術層面的除錯資訊。
-   - **【反骨架幻覺規則 (極重要)】**：骨架辨識模型(Action)非常容易因為下半身被桌子或物體遮擋，而將「站立」或「行走」錯誤判斷為「坐著(Sitting)」。如果在【行為辨識】看到某人是「坐著」，但【VLM 判斷】或【BLIP 判斷】的整體畫面描述是「兩人行走」、「交談」、「走進長廊」、「站立」等，你必須**絕對相信全域影像的描述**，將該人物的動作修正為「站立」或「行走」，並在【多重驗證推理】中明確指出骨架模型產生了「坐著」的誤判。
-   - **【反過度推論禁令】**
-     * 物件推論：如果 YOLO-World 未偵測到某物件（如書本、卡片、水杯、手機），絕對不能在家屬報告中提及該物件。如果 VLM/BLIP 說有拿書但 YOLO 沒看到，那就是幻覺，絕對不能寫。
-     * 空間推論：不能推論具體地點名稱（如護理室、客廳、房間），只能說「在室內」或「走廊」。
-     * 動機推論：不能推論人物的動機或意圖（如「想要和好」、「驚醒」、「好像在等什麼」）。
-     * 時間推論：不能推論影片前後發生了什麼（如「剛吃完早餐」）。
-     * 互動推論：如果兩人沒有物理接觸、沒有明確在交談，不能說他們在「聊天」或「坐在一起」。
-     * 偏好推論：不能推論人物的喜好。
-3. **工程師對比區塊**：必須明確列出各個模型的原始輸出（行為辨識、人與物互動、VLM判斷、BLIP判斷、YOLO-World環境物件）。
-4. **多重驗證 (Multiple Verification)**：在工程師區塊中，所有的感測輸出(Action, HOI)都只是初步參考，最終的行為判斷必須由你進行邏輯推理後得出，絕對不能盲目相信單一感測器。如果 HOI 或 VLM 偵測到物件，但 YOLO-World 沒有偵測到，則該物件為幻覺，不得採信。
+【嚴格遵守事項】
+1. **詳細描述**：詳盡記錄長輩在此片段內的物理動作、人機互動、移動軌跡。
+2. **客觀事實**：以系統感測紀錄與VLM視覺描述為基礎，不要過度腦補內心情緒或動機。
+3. **場景重建**：如果VLM提供了視覺描述或環境物件，請巧妙融合進句子中，讓分析更有畫面感。
 
 <|im_end|>
 <|im_start|>user
@@ -224,109 +211,88 @@ class QwenReporter:
 前端感測紀錄與去幻覺驗證結果：
 {clip_context}
 
-BLIP 視覺描述紀錄：
-{blip_context}
-
 SmolVLM 視覺描述紀錄：
 {vlm_context}
 
 知識圖譜關聯：
 {kg_text}
 
-請嚴格依照以下格式輸出：
-
-=== 工程師對比區塊 ===
-【模型原始輸出】
-- 行為辨識 (Action): (列出感測紀錄中的 Action 結果)
-- 人與物互動 (HOI): (列出感測紀錄中的 HOI 結果)
-- 實際環境物件 (YOLO-World): (列出感測紀錄中的環境物件偵測統計)
-- VLM 判斷: (列出 SmolVLM 的描述)
-- BLIP 判斷: (列出 BLIP 的描述)
-
-【多重驗證推理】
-(分析上述來源是否有衝突？何者比較合理？並給出最終推論的真實行為判斷。)
-
-=== 家屬報告 ===
-(根據你在【多重驗證推理】得出的最終真實行為，以溫暖、日常的口吻，告訴家屬長輩在這個片段中正在做什麼、精神狀況如何。不要提及任何AI、感測器或系統字眼。)
+請直接輸出詳細的片段分析內容：
 
 <|im_end|>
 <|im_start|>assistant
 """
             try:
                 if isinstance(self.llm, str):
-                    report = f"=== 家屬報告 ===\n長輩今天狀況良好。\n=== 工程師對比區塊 ===\n測試分析。"
+                    report = f"長輩在此片段({clip})中，主要在走廊散步，動作正常。"
                 else:
-                    response = self.llm(prompt, max_tokens=1500, temperature=0.2, top_p=0.9, stop=["<|im_end|>"])
+                    response = self.llm(prompt, max_tokens=2500, temperature=0.2, top_p=0.9, stop=["<|im_end|>"])
                     report = response["choices"][0]["text"].strip()
                     if "<think>" in report:
                         report = re.sub(r'<think>.*?</think>', '', report, flags=re.DOTALL).strip()
                 
-                logger.info(f"Generated concise report for {clip}")
-                
-                parts = report.split("=== 家屬報告 ===")
-                eng_report = parts[0].strip()
-                family_report = parts[1].strip() if len(parts) > 1 else ""
+                logger.info(f"Generated detailed analysis for {clip}")
+                detailed_report = report.strip()
                 
                 day_match = re.search(r'(day\d+)', clip, re.IGNORECASE)
                 day_str = day_match.group(1).lower() if day_match else "dayX"
                 
-                # Get present persons
                 present_persons = set(ev.get("person") for ev in events_by_clip[clip] if ev.get("person", "Unknown") != "Unknown")
                 
-                # Global Append
-                for person in present_persons:
-                    with open(llm_dir / f"{person}_{day_str}_家屬報告.txt", "a", encoding="utf-8") as f:
-                        f.write(f"{family_report}\n\n")
-                    if eng_report:
-                        with open(llm_dir / f"{person}_{day_str}_工程師除錯.txt", "a", encoding="utf-8") as f:
-                            f.write(f"\n--- 【來源：{clip}】 ---\n{eng_report}\n")
-                            
-                # Per Clip Save (Combined)
+                # Per Clip Save (Detailed Analysis)
                 with open(per_clip_dir / f"{clip}.txt", "w", encoding="utf-8") as f:
-                    f.write(f"=== 家屬報告 ===\n{family_report}\n\n{eng_report}")
+                    f.write(f"{detailed_report}\n")
+                    
+                # Collect for daily personal summary
+                for person in present_persons:
+                    key = (person, day_str)
+                    if key not in getattr(self, '_daily_collections', {}):
+                        if not hasattr(self, '_daily_collections'):
+                            self._daily_collections = {}
+                        self._daily_collections[key] = []
+                    self._daily_collections[key].append(f"【{clip}】\n{detailed_report}")
                             
             except Exception as e:
                 logger.error(f"Generation failed for {clip}: {e}")
-                report = "Error"
-                eng_report = "Error"
+                
+        # --- 2. Generate Daily Personal Reports ---
+        if hasattr(self, '_daily_collections'):
+            for (person, day_str), logs in self._daily_collections.items():
+                daily_logs_text = "\n\n".join(logs)
+                daily_prompt = f"""<|im_start|>system
+你是一位長照中心護理長。請根據長輩今天的詳細活動紀錄，總結成一份給家屬的【一日報表】。
 
-            # --- 2. Generate GT Analysis Report ---
-            gt_prompt = f"""<|im_start|>system
-你是系統評估工程師。你的任務是將「系統多重驗證後的推論結果」與「真實答案 (Ground Truth)」進行嚴格比對，並產出差異分析報告。
+【嚴格遵守事項】
+1. **極度精簡與溫暖**：不需要詳細的分析，只需要簡單、精簡、溫暖地總結今日重點作息即可。
+2. **語氣自然**：用語要溫暖，像是在用 Line 傳訊息給家屬報平安。
+3. **絕對禁止科技術語**：絕對不可提及「AI」、「感測器」、「視覺模型」、「VLM」、「YOLO」等詞彙。
 
 <|im_end|>
 <|im_start|>user
-當前影片片段：{clip}
+長輩姓名：{person}
+日期：{day_str}
 
-【系統推論結果】
-{eng_report}
+今日詳細活動紀錄：
+{daily_logs_text}
 
-【正確答案參考 (Ground Truth)】
-{ground_truth_text}
-
-請針對此片段，比對系統推論與 Ground Truth 的差異，指出系統是否誤判了行為或情緒，並分析可能的盲點原因。
-請直接輸出分析內容。
+請直接輸出給家屬的一日報表文字，不要有任何多餘的標題：
 <|im_end|>
 <|im_start|>assistant
 """
-            try:
-                if isinstance(self.llm, str):
-                    gt_analysis = "GT 差異分析測試。"
-                else:
-                    response = self.llm(gt_prompt, max_tokens=1000, temperature=0.2, top_p=0.9, stop=["<|im_end|>"])
-                    gt_analysis = response["choices"][0]["text"].strip()
-                    if "<think>" in gt_analysis:
-                        gt_analysis = re.sub(r'<think>.*?</think>', '', gt_analysis, flags=re.DOTALL).strip()
-                
-                logger.info(f"Generated GT Analysis for {clip}")
-                
-                # ---- Disable GT Analysis to prevent harsh criticism as requested by user ----
-                # for person in ["王奶奶", "陳爺爺"]:
-                #     with open(llm_dir / f"{person}_{day_str}_GT差異分析.txt", "a", encoding="utf-8") as f:
-                #         f.write(f"\n--- 【來源：{clip}】 ---\n{gt_analysis}\n")
-                        
-            except Exception as e:
-                logger.error(f"GT Analysis failed for {clip}: {e}")
+                try:
+                    if isinstance(self.llm, str):
+                        daily_summary = "長輩今天狀況良好，有好好吃飯與散步。"
+                    else:
+                        response = self.llm(daily_prompt, max_tokens=1000, temperature=0.2, top_p=0.9, stop=["<|im_end|>"])
+                        daily_summary = response["choices"][0]["text"].strip()
+                        if "<think>" in daily_summary:
+                            daily_summary = re.sub(r'<think>.*?</think>', '', daily_summary, flags=re.DOTALL).strip()
+                    
+                    with open(llm_dir / f"{person}_{day_str}_一日報表.txt", "w", encoding="utf-8") as f:
+                        f.write(f"{daily_summary}\n")
+                    logger.info(f"Generated daily summary for {person} on {day_str}")
+                except Exception as e:
+                    logger.error(f"Daily summary failed for {person}: {e}")
 
         # --- 3. Final Report (No GT) ---
         final_prompt = f"""<|im_start|>system

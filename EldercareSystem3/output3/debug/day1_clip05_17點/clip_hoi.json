@@ -1,0 +1,66 @@
+[
+  {
+    "video": "day1_clip05_17點",
+    "track_id": 2,
+    "person": "陳爺爺",
+    "type": "Action",
+    "action": "Walking",
+    "confidence": 0.5766873837455933,
+    "start_frame": 0,
+    "end_frame": 145
+  },
+  {
+    "video": "day1_clip05_17點",
+    "track_id": 2,
+    "person": "陳爺爺",
+    "type": "Action",
+    "action": "Standing",
+    "confidence": 0.42908310890197754,
+    "start_frame": 145,
+    "end_frame": 155
+  },
+  {
+    "video": "day1_clip05_17點",
+    "track_id": 2,
+    "person": "陳爺爺",
+    "type": "Action",
+    "action": "Sitting",
+    "confidence": 0.8,
+    "start_frame": 155,
+    "end_frame": 183
+  },
+  {
+    "video": "day1_clip05_17點",
+    "track_id": 2,
+    "person": "陳爺爺",
+    "type": "Action",
+    "action": "Standing",
+    "confidence": 0.5425592660903931,
+    "start_frame": 183,
+    "end_frame": 191
+  },
+  {
+    "video": "day1_clip05_17點",
+    "track_id": 7,
+    "person": "王奶奶",
+    "type": "Action",
+    "action": "Sitting",
+    "confidence": 0.9369599557275592,
+    "start_frame": 0,
+    "end_frame": 115
+  },
+  {
+    "type": "HOI-CLIP",
+    "action": "Sitting_On",
+    "object": "Chair",
+    "track_id": 2,
+    "frame_idx": 150,
+    "start_frame": 150,
+    "end_frame": 150,
+    "confidence": 0.431,
+    "video": "day1_clip05_17點",
+    "person": "陳爺爺",
+    "vlm_verified": false,
+    "vlm_answer": "no."
+  }
+]

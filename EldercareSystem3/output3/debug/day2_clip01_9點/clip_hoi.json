@@ -1,0 +1,60 @@
+[
+  {
+    "video": "day2_clip01_9點",
+    "track_id": 2,
+    "person": "陳爺爺",
+    "type": "Action",
+    "action": "Walking",
+    "confidence": 0.6471351446659601,
+    "start_frame": 0,
+    "end_frame": 166
+  },
+  {
+    "video": "day2_clip01_9點",
+    "track_id": 2,
+    "person": "陳爺爺",
+    "type": "Action",
+    "action": "Standing",
+    "confidence": 0.7799523945432156,
+    "start_frame": 166,
+    "end_frame": 192
+  },
+  {
+    "video": "day2_clip01_9點",
+    "track_id": 1,
+    "person": "王奶奶",
+    "type": "Action",
+    "action": "Sitting",
+    "confidence": 0.9303519737119705,
+    "start_frame": 0,
+    "end_frame": 192
+  },
+  {
+    "type": "HOI-CLIP",
+    "action": "Reading",
+    "object": "Book",
+    "track_id": 1,
+    "frame_idx": 30,
+    "start_frame": 30,
+    "end_frame": 30,
+    "confidence": 0.466,
+    "video": "day2_clip01_9點",
+    "person": "王奶奶",
+    "vlm_verified": true,
+    "vlm_answer": "yes."
+  },
+  {
+    "type": "HOI-CLIP",
+    "action": "Holding",
+    "object": "Book",
+    "track_id": 1,
+    "frame_idx": 150,
+    "start_frame": 150,
+    "end_frame": 150,
+    "confidence": 0.458,
+    "video": "day2_clip01_9點",
+    "person": "王奶奶",
+    "vlm_verified": true,
+    "vlm_answer": "yes."
+  }
+]

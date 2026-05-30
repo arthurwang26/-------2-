@@ -1,0 +1,64 @@
+{
+  "3": [
+    {
+      "action": "Standing",
+      "confidence": 0.74140663768077,
+      "start_frame": 0,
+      "end_frame": 192
+    }
+  ],
+  "2": [
+    {
+      "action": "Sitting",
+      "confidence": 0.8,
+      "start_frame": 0,
+      "end_frame": 155
+    },
+    {
+      "action": "Standing",
+      "start_frame": 155,
+      "end_frame": 192,
+      "confidence": 0.6600308890047017
+    }
+  ],
+  "5": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "6": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "7": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "11": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "16": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "2": [
+    {
+      "action": "Walking",
+      "confidence": 0.6471351446659601,
+      "start_frame": 0,
+      "end_frame": 166
+    },
+    {
+      "action": "Standing",
+      "start_frame": 166,
+      "end_frame": 192,
+      "confidence": 0.7799523945432156
+    }
+  ],
+  "1": [
+    {
+      "action": "Sitting",
+      "confidence": 0.9303519737119705,
+      "start_frame": 0,
+      "end_frame": 192
+    }
+  ],
+  "6": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "4": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ],
+  "19": [
+    {
+      "action": "Unknown",
+      "confidence": 0.0,
+      "start_frame": 0,
+      "end_frame": 0
+    }
+  ]
+}

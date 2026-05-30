@@ -24,7 +24,7 @@ def save_video(frames, path, fps=8):
     out.release()
 
 def run():
-    out_dir = cfg.output_dir / "action_videos_v3"
+    out_dir = Path("output3/action_videos_test")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     video_files = sorted(glob.glob(str(cfg.raw_dir / "*.mp4")))
@@ -50,8 +50,17 @@ def run():
 
         # Load debug JSONs
         debug_dir = cfg.output_dir / "debug" / vid_name
+        if not (debug_dir / "tracks.json").exists():
+            logger.warning(f"No tracks.json found for {vid_name}, skipping.")
+            continue
+            
         with open(debug_dir / "tracks.json", "r", encoding="utf-8") as f:
             tracks = json.load(f)
+            
+        if not (debug_dir / "skeletons.json").exists():
+            logger.warning(f"No skeletons.json found for {vid_name}, skipping.")
+            continue
+        
         with open(debug_dir / "skeletons.json", "r", encoding="utf-8") as f:
             skeletons = json.load(f)
         
@@ -78,7 +87,8 @@ def run():
             tid = int(tid_str)
             if tid not in identities or identities[tid] == "Unknown":
                 continue
-            act_list = act_model.predict(skel_seq)
+            frame_h, frame_w = frames[0].shape[:2]
+            act_list = act_model.predict(skel_seq, frame_w=frame_w, frame_h=frame_h)
             actions[tid] = act_list
 
         vis_frames = []
